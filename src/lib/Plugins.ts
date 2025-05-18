@@ -425,8 +425,12 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
         // 检查是否有模板配置
         if (result?.template?.enabled) {
             try {
+                let templateIsPath: boolean = true;
+                const templateHtml = result.template.html;
                 const templatePath = result.template.path;
-                if (!templatePath || !fs.existsSync(templatePath)) {
+                if (templateHtml) {
+                    templateIsPath = false;
+                } else if (!templatePath || !fs.existsSync(templatePath)) {
                     throw new Error(`Template not found: ${templatePath}`);
                 }
 
@@ -434,7 +438,8 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                 const htmlImg = new HtmlImg();
                 try {
                     const img = await htmlImg.render({
-                        template: templatePath,
+                        template: templateIsPath ? templatePath : templateHtml,
+                        templateIsPath,
                         data: result,
                         width: result.template.render?.width || 800,
                         height: result.template.render?.height || 600,

@@ -18,6 +18,7 @@ export class HtmlImg {
 
     async render(options: {
         template: string;
+        templateIsPath?: boolean;
         data: any;
         width?: number;
         height?: number;
@@ -28,9 +29,10 @@ export class HtmlImg {
     }) {
         try {
             await this.init();
-            
+
             const {
                 template,
+                templateIsPath = true,
                 data,
                 width = 800,
                 height = 600,
@@ -41,8 +43,8 @@ export class HtmlImg {
             } = options;
 
             // 读取模板
-            const templateContent = fs.readFileSync(template, 'utf-8');
-            
+            const templateContent = templateIsPath ? fs.readFileSync(template, 'utf-8') : template;
+
             // 渲染HTML
 
             const html = art.render(templateContent, data);
