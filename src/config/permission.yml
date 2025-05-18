@@ -25,6 +25,7 @@ users:
         commands:
           ping: true
           help: true
+          图: true
   default:
     plugins:
       test:
