@@ -1,3 +1,5 @@
+//PLUGIN sakulin.ts
+
 import {param, ParamType, plugins, runcod} from '../lib/decorators.js';
 import 'reflect-metadata';
 
@@ -13,7 +15,7 @@ const imgSourceMap: { [key: string]: string } = {
     "东方": "https://image.anosu.top/pixiv/direct?r18=0&keyword=touhou"
 };
 
-const defaultSource = "二次元";
+const defaultSource = "三次元";
 
 
 @plugins({
@@ -36,7 +38,7 @@ export class sakulass {
         return "pong";
     }
 
-    @runcod(["图"], "看看图，可添加不同图源作为参数，例如 “#saku 图 原神” ，可选的图源有：" + Object.keys(imgSourceMap).map(e => ((e == defaultSource) ? (e + "（默认）") : e)).join("、"))
+    @runcod(["图", "tu"], "看看图，可添加不同图源作为参数，例如发送 “#saku 图 原神” ，可选的图源有：" + Object.keys(imgSourceMap).map(e => ((e == defaultSource) ? (e + "（默认）") : e)).join("、"))
     async image(
         @param("图源", ParamType.String) type: string,
     ) {
