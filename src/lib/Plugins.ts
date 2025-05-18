@@ -118,7 +118,8 @@ async function loadPlugins(): Promise<void> {
                                 class: instance.constructor,
                                 version: pluginConfig.version,
                                 author: pluginConfig.author,
-                                describe: pluginConfig.describe
+                                describe: pluginConfig.describe,
+                                config: pluginConfig
                             };
                             // 触发装饰器
                             await initializePluginCommands(instance);
@@ -332,8 +333,17 @@ export async function runplugins() {
                     botlogger.info(`${CMD_PREFIX}${plugin.id} ${cmd.cmd}`);
                 });
 
-                // 查找命令
-                const command = findCommand(plugin, cmdName);
+                let command: Command | undefined = undefined;
+                if (cmdName == undefined) {
+                    botlogger.info(`未检测到第二个参数，运行默认命令: ${plugin.config.defaultCommandId}`);
+
+                    const commandId = plugin.config.defaultCommandId ?? "help";
+
+                    command = findCommand(plugin, commandId);
+                } else {
+                    command = findCommand(plugin, cmdName);
+                }
+
                 if (!command) {
                     botlogger.info(`命令未找到: ${cmdName}`);
                     return;
@@ -578,7 +588,8 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
                 id: pluginId,
                 name: pluginName,
                 commands: [],
-                class: target.constructor
+                class: target.constructor,
+                config: pluginConfig
             };
             commandList.push(plugin);
             botlogger.info(`创建新插件[${pluginId}]: ${pluginName}`);

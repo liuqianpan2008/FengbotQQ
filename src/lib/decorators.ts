@@ -60,6 +60,7 @@ export interface Plugin {
     version?: string;
     author?: string;
     describe?: string;
+    config: PluginConfig
 }
 // 修改插件装饰器配置接口
 export interface PluginConfig {
@@ -73,7 +74,7 @@ export interface PluginConfig {
         command?: string[];     // 帮助命令
         description?: string;   // 帮助命令描述
     };
-    default?: () => any; // 默认函数
+    defaultCommandId?: string; // 默认函数
 }
 
 // 在 decorators.ts 中定义统一的接口
@@ -114,7 +115,8 @@ export function plugins(config: PluginConfig): ClassDecorator {
                 id: config.id,
                 name: config.name,
                 class: target,
-                commands: [] as Command[]
+                commands: [] as Command[],
+                config
             };
             commandList.push(plugin);
             // 添加调试日志
@@ -209,8 +211,9 @@ export function plugins(config: PluginConfig): ClassDecorator {
             botlogger.info(`成功注册[${plugin.id}]帮助命令: ${CMD_PREFIX}${plugin.id} help`);
         }
 
-        if (!config.default) {
-            config.default = () => ({redirect: "help"});
+        // 检查并添加默认命令
+        if (!config.defaultCommandId) {
+            config.defaultCommandId = "help";
         }
     };
 }
@@ -262,7 +265,8 @@ export function runcod(cmd: string | string[], desc: string, config: CommandConf
                     id: pluginConfig.id,
                     name: pluginName,
                     commands: [] as Command[],
-                    class: target.constructor
+                    class: target.constructor,
+                    config: pluginConfig
                 };
                 commandList.push(plugin);
                 botlogger.info(`创建新插件: ${pluginName}`);
