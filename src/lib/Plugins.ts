@@ -236,7 +236,7 @@ export async function runplugins() {
                 if (msg.startsWith("//PLUGIN ")) {
                     const endOfLine = msg.indexOf("\n");
                     if (endOfLine !== -1) {
-                        const pluginName = msg.substring(9).trim();
+                        const pluginName = msg.substring(9, endOfLine).trim();
                         if (pluginName.endsWith(".ts")) {
 
                             botlogger.info("开始安装插件: " + pluginName);
@@ -250,6 +250,7 @@ export async function runplugins() {
                                 type: 'text',
                                 data: {text: `插件下载完成,开始重载`}
                             }]);
+                            return;
                         }
                     }
                 }
