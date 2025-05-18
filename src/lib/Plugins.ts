@@ -19,6 +19,7 @@ import { ImageSegment, ReplySegment,  TextSegment } from "node-napcat-ts/dist/St
 import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { count } from "node:console";
+import { IsPermission } from "./Permission.js";
 
 //WSSendParam
 
@@ -173,79 +174,7 @@ async function initializeScheduledTasks(instance: any): Promise<void> {
         }
     }
 }
-async function IsPermission(id: number, plugin: string, command: string): Promise<boolean> {
-    try {
-        // 获取用户权限配置（带默认回退）
-        const userPermission = getUserPermission(id);
-        
-        // 获取插件配置（带默认回退）
-        const pluginConfig = getPluginConfig(userPermission, plugin);
-        
-        // 检查插件总开关
-        if (pluginConfig?.enable === false) return false;
 
-        // 获取命令权限配置
-        const commandPermission = getCommandPermission(pluginConfig, command);
-        
-        // 自动保存新配置
-        if (commandPermission === undefined) {
-            await saveNewCommandConfig(id, plugin, command);
-            return true; // 默认允许新命令
-        }
-        
-        return Boolean(commandPermission);
-    } catch (error) {
-        if (error instanceof Error) {
-            botlogger.error(`权限检查失败 [${id}/${plugin}/${command}]：${error.message}`);
-        } else {
-            botlogger.error(`权限检查失败 [${id}/${plugin}/${command}]：未知错误`);
-        }
-        return false; // 出错时默认拒绝
-    }
-}
-
-// 新增辅助函数
-function getUserPermission(id: number) {
-    // 确保默认配置层级存在
-    if (!PermissionConfig.users.default) {
-        PermissionConfig.users.default = { plugins: {} };
-    }
-    if (!PermissionConfig.users.default.plugins) {
-        PermissionConfig.users.default.plugins = {};
-    }
-    
-    // 深度合并用户配置与默认配置
-    return {
-        plugins: {
-            ...PermissionConfig.users.default.plugins,
-            ...(PermissionConfig.users[id]?.plugins || {})
-        }
-    };
-}
-
-async function saveNewCommandConfig(id: number, plugin: string, command: string) {
-    try {
-        // 初始化用户配置树
-        PermissionConfig.users[id] = PermissionConfig.users[id] || { plugins: {} };
-        PermissionConfig.users[id].plugins[plugin] = PermissionConfig.users[id].plugins[plugin] || { commands: {} };
-        PermissionConfig.users[id].plugins[plugin].commands = PermissionConfig.users[id].plugins[plugin].commands || {};
-        
-        // 设置新命令默认权限
-        PermissionConfig.users[id].plugins[plugin].commands[command] = true;
-        
-        await config.saveConfig('permission', PermissionConfig);
-        botlogger.info(`自动创建 [${id}] 的 ${plugin}.${command} 命令权限`);
-    } catch (error) {
-        botlogger.error(`配置保存失败：${error instanceof Error ? error.stack : error}`);
-    }
-}
-function getPluginConfig(userPermission: any, plugin: string) {
-    return userPermission?.plugin?.[plugin] ?? PermissionConfig.user.default.plugin[plugin];
-}
-
-function getCommandPermission(pluginConfig: any, command: string) {
-    return pluginConfig?.command?.[command];
-}
 
 
 // 修改 runplugins 函数
@@ -309,26 +238,26 @@ export async function runplugins() {
 
                 botlogger.info(`找到命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                 //指令权限检查
-                //if(context.message_type === 'private'){
-                //    if(!await IsPermission(context.user_id,plugin.id,command.cmd)){
-                //        botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
-                //        context.quick_action([{
-                //            type: 'text',
-                //            data: { text: `你没有权限执行此命令` }
-                //        }]);
-                //        return;
-                //    }
-                //}
-                //if(context.message_type === 'group'){
-                //    if(!await IsPermission(context.group_id,plugin.id,command.cmd)){
-                //        botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
-                //        context.quick_action([{
-                //            type: 'text',
-                //            data: { text: `你没有权限执行此命令` }
-                //        }])
-                //        return;
-                //    }
-                //}
+                if(context.message_type === 'private'){
+                    if(!await IsPermission(context.user_id,plugin.id,command.cmd)){
+                        botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
+                        context.quick_action([{
+                            type: 'text',
+                            data: { text: `你没有权限执行此命令` }
+                        }]);
+                        return;
+                    }
+                }
+                if(context.message_type === 'group'){
+                    if(!await IsPermission(context.group_id,plugin.id,command.cmd)){
+                        botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
+                        context.quick_action([{
+                            type: 'text',
+                            data: { text: `你没有权限执行此命令` }
+                       }])
+                        return;
+                    }
+                }
                 // 执行命令
                 await handleCommand(context, plugin, command, args);
 

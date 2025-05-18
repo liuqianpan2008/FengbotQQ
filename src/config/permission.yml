@@ -1,23 +1,16 @@
 enable: true
 users:
-  default:  # 默认配置
+  default:
     plugins:
       test:
         enable: true
         commands:
-          "*": true  # 通配符表示所有命令默认允许
-          
-  # 用户/群组特定配置（可选）
-  211249983:
-    plugins:
-      test:
-        commands:
-          dangerousCommand: false
-          
-  1008611:
+          help: true
+          param: false
+  '211249983':
     plugins:
       test:
         enable: true
         commands:
-          MyCommand: true
-          MyCommand2: false
+          help: true
+          param: false
