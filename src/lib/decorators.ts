@@ -73,7 +73,7 @@ export interface PluginConfig {
         command?: string[];     // 帮助命令
         description?: string;   // 帮助命令描述
     };
-    default?: () => ({}); // 默认函数
+    default?: () => any; // 默认函数
 }
 
 // 在 decorators.ts 中定义统一的接口
