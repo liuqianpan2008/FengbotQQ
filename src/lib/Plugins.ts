@@ -430,7 +430,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
             }
         } else if (result?.picture?.enabled) {
 
-            const messages = [createImageMessage(result.picture.base64)];
+            const messages: any[] = [createImageMessage(result.picture.base64)];
 
             if (typeof result.picture.supplement == "string") {
                 messages.push(createTextMessage(result.picture.supplement));
