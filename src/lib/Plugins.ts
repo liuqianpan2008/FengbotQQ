@@ -1,8 +1,13 @@
 
 import botlogger from "./logger.js";
-import { promises as fsPromises } from 'fs';
-import { HtmlImg } from "./Puppeteer.js";
-import type { GroupMessage, EventHandleMap as MessageContext, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
+import {promises as fsPromises} from 'fs';
+import {HtmlImg} from "./Puppeteer.js";
+import type {
+    GroupMessage,
+    EventHandleMap as MessageContext,
+    PrivateFriendMessage,
+    PrivateGroupMessage
+} from 'node-napcat-ts/dist/Interfaces.js';
 import * as cron from 'node-cron';
 import 'reflect-metadata';
 import {
@@ -14,13 +19,13 @@ import {
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
-import { Botconfig as config, load, PermissionConfig, saveConfig } from './config.js'
-import { ImageSegment, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
-import { fileURLToPath } from 'node:url';
-import { qqBot } from "../app.js";
-import { count } from "node:console";
-import { IsPermission } from "./Permission.js";
-import { download } from "./download.js";
+import {Botconfig as config, PermissionConfig} from './config.js'
+import {ImageSegment, ReplySegment, TextSegment} from "node-napcat-ts/dist/Structs.js";
+import {fileURLToPath} from 'node:url';
+import {qqBot} from "../app.js";
+import {count} from "node:console";
+import {IsPermission} from "./Permission.js";
+import {download} from "./download.js";
 
 //WSSendParam
 
@@ -29,7 +34,7 @@ const CMD_PREFIX = config?.cmd?.prefix ?? '#';
 // 导出装饰器
 // export { param, ParamType };
 // export const plugins = pluginsDecorator;
-export { config };  // 导出配置对象
+export {config};  // 导出配置对象
 // 创建消息工厂函数
 function createTextMessage(text: string): TextSegment {
     return {
@@ -207,13 +212,11 @@ export async function runplugins() {
                     const file = context.message[0].data;
                     botlogger.info("收到文件消息:" + JSON.stringify(file));
                     if (file.file.includes(".ts")) {
-                        let isAdmin = false
-                        // 使用 some 方法简化循环逻辑，只要数组中有一个元素满足条件就返回 true
-                        isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
+                        let isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
                         if (!isAdmin) {
                             context.quick_action([{
                                 type: 'text',
-                                data: { text: `无权限，无法加载插件` }
+                                data: {text: `无权限，无法加载插件`}
                             }]);
                             return;
                         }
@@ -222,7 +225,7 @@ export async function runplugins() {
                         botlogger.info("下载完成:" + JSON.stringify(file));
                         context.quick_action([{
                             type: 'text',
-                            data: { text: `插件下载完成,开始重载` }
+                            data: {text: `插件下载完成,开始重载`}
                         }]);
                         let isload = load
                             isload.isuplad=true;
@@ -238,11 +241,32 @@ export async function runplugins() {
                     return;
                 }
 
-
                 if (context.message[0].type !== 'text') {
                     return;
                 }
                 const msg = context.message[0].data.text || '';
+
+                if (msg.startsWith("//PLUGIN ")) {
+                    const endOfLine = msg.indexOf("\n");
+                    if (endOfLine !== -1) {
+                        const pluginName = msg.substring(9).trim();
+                        if (pluginName.endsWith(".ts")) {
+
+                            botlogger.info("开始安装插件: " + pluginName);
+
+                            // @ts-ignore
+                            fs.writeFile(`../plugins/${pluginName}`, msg, "utf8", (e) => {
+                                botlogger.error("插件安装失败: " + JSON.stringify(e));
+                            });
+
+                            context.quick_action([{
+                                type: 'text',
+                                data: {text: `插件下载完成,开始重载`}
+                            }]);
+                        }
+                    }
+                }
+
                 botlogger.info('收到消息:' + context.message[0].data.text);
                 // 检查是否是命令
                 if (!msg.startsWith(CMD_PREFIX)) {
@@ -292,7 +316,7 @@ export async function runplugins() {
                         botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
-                            data: { text: `你没有权限执行此命令` }
+                            data: {text: `你没有权限执行此命令`}
                         }]);
                         return;
                     }
@@ -302,7 +326,7 @@ export async function runplugins() {
                         botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
-                            data: { text: `你没有权限执行此命令` }
+                            data: {text: `你没有权限执行此命令`}
                         }])
                         return;
                     }
@@ -314,7 +338,7 @@ export async function runplugins() {
                 botlogger.error("处理消息时出错:", error);
                 await context.quick_action([{
                     type: 'text',
-                    data: { text: `处理消息时出错: ${error instanceof Error ? error.message : '未知错误'}` }
+                    data: {text: `处理消息时出错: ${error instanceof Error ? error.message : '未知错误'}`}
                 }]);
             }
         });
@@ -480,7 +504,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
         const errorMessage = error instanceof Error ? error.message : '未知错误';
         await context.quick_action([{
             type: 'text',
-            data: { text: `执行命令时出错: ${errorMessage}` }
+            data: {text: `执行命令时出错: ${errorMessage}`}
         }]);
     }
 }
