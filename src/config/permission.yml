@@ -1,13 +1,29 @@
 enable: true
+admins:
+  - '2180323481'
+  - '1814872986'
 users:
-  default:
+  '211249983':
     plugins:
       test:
         enable: true
         commands:
           help: true
           param: false
-  '211249983':
+      testupload:
+        commands:
+          help: true
+          param: true
+      downloadPlugins:
+        commands:
+          download: true
+          help: true
+          plugins: true
+      saku:
+        commands:
+          ping: true
+          help: true
+  default:
     plugins:
       test:
         enable: true

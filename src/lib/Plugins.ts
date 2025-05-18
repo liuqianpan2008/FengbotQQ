@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { count } from "node:console";
 import { IsPermission } from "./Permission.js";
+import { download } from "./download.js";
 
 //WSSendParam
 
@@ -136,7 +137,7 @@ async function loadPlugins(): Promise<void> {
 async function initializePluginCommands(instance: any): Promise<void> {
     const methods = Object.getOwnPropertyNames(instance.constructor.prototype)
         .filter(name => name !== 'constructor');
-    
+
     for (const methodName of methods) {
         const method = instance.constructor.prototype[methodName];
         try {
@@ -201,6 +202,33 @@ export async function runplugins() {
         // 设置消息处理器
         qqBot.on('message', async (context) => {
             try {
+                // 检查消息类型和内容
+                if (context.message[0].type === "file") {
+                    const file = context.message[0].data;
+                    botlogger.info("收到文件消息:" + JSON.stringify(file));
+                    if (file.file.includes(".ts")) {
+                        let isAdmin = false
+                        // 使用 some 方法简化循环逻辑，只要数组中有一个元素满足条件就返回 true
+                        isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
+                        if (!isAdmin) {
+                            context.quick_action([{
+                                type: 'text',
+                                data: { text: `无权限，无法加载插件` }
+                            }]);
+                            return;
+                        }
+                        const url = (file as any).url; // 文件URL
+                        await download(url, `../plugins/${file.file}`);
+                        botlogger.info("下载完成:" + JSON.stringify(file));
+                        context.quick_action([{
+                            type: 'text',
+                            data: { text: `插件下载完成,开始重载` }
+                        }]);
+                    }
+                    return;
+                }
+
+
                 if (context.message[0].type !== 'text') {
                     return;
                 }

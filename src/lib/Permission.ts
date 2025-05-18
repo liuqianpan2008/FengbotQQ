@@ -3,6 +3,10 @@ import botlogger from "./logger.js";
 
 export async function IsPermission(id: number, plugin: string, command: string): Promise<boolean> {
     try {
+        // 检查用户是否在白名单中
+        if (PermissionConfig.admins.some((admin: string) => admin === String(id))) {
+            return true;
+        }
         // 获取用户权限配置（带默认回退）
         const userPermission = getUserPermission(id);
         
