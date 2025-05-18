@@ -252,6 +252,15 @@ export async function runplugins() {
                         const pluginName = msg.substring(9, endOfLine).trim();
                         if (pluginName.endsWith(".ts")) {
 
+                            let isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
+                            if (!isAdmin) {
+                                context.quick_action([{
+                                    type: 'text',
+                                    data: {text: `无权限，无法加载插件`}
+                                }]);
+                                return;
+                            }
+
                             botlogger.info("开始安装插件: " + pluginName);
 
                             // @ts-ignore
@@ -275,6 +284,19 @@ export async function runplugins() {
                             saveConfig("load", isload)
                         }
                     }
+                }
+
+                if (msg == CMD_PREFIX) {
+                    context.quick_action([{
+                        type: 'text',
+                        data: {
+                            text: "可用的命令有：\n" +
+                                commandList.map(p => `${CMD_PREFIX}${p.id}: ${p.name}`).join('\n') +
+                                "\n\n" +
+                                `使用 “${CMD_PREFIX}插件名 help” 或 “${CMD_PREFIX}插件名 ?” 查询命令的详情 ^_^`
+                        }
+                    }]);
+                    return;
                 }
 
                 botlogger.info('收到消息:' + context.message[0].data.text);
