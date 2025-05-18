@@ -15,3 +15,4 @@ export function saveConfig(file: string, data: any): void {
 }
 export const Botconfig = await loadConfig('bot');
 export const PermissionConfig = await loadConfig('permission');
+export const load = await loadConfig('load')
