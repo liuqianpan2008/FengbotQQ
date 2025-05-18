@@ -32,9 +32,6 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@16.18.126)(typescript@4.9.5)
       winston:
         specifier: ^3.17.0
         version: 3.17.0
@@ -52,7 +49,7 @@ importers:
         specifier: ^1.2.5
         version: 1.2.5
       '@types/node':
-        specifier: ^16.0.0
+        specifier: ^16.18.126
         version: 16.18.126
       '@types/node-cron':
         specifier: ^3.0.11
@@ -63,11 +60,14 @@ importers:
       nodemon:
         specifier: ^3.1.9
         version: 3.1.10
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@16.18.126)(typescript@4.9.5)
       tsconfig-paths:
         specifier: ^4.2.0
         version: 4.2.0
       typescript:
-        specifier: ^4.5.0
+        specifier: ^4.9.5
         version: 4.9.5
 
 packages:

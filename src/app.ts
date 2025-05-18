@@ -25,3 +25,12 @@ process.on('SIGINT', () => {
   qqBot.disconnect();
   process.exit(0);
 });
+
+process.on('uncaughtException', (error) => {
+    console.error('[致命错误]', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[未处理的Promise拒绝]', reason);
+});

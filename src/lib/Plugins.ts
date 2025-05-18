@@ -2,20 +2,20 @@
 import botlogger from "./logger.js";
 import { promises as fsPromises } from 'fs';
 import { HtmlImg } from "./Puppeteer.js";
-import type {GroupMessage, EventHandleMap as MessageContext, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
+import type { GroupMessage, EventHandleMap as MessageContext, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
 import * as cron from 'node-cron';
 import 'reflect-metadata';
-import { 
-    ParamType, 
-    commandList, 
+import {
+    ParamType,
+    commandList,
     Command,
     Plugin,
 } from './decorators.js';
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
-import {Botconfig as config, PermissionConfig} from './config.js'
-import { ImageSegment, ReplySegment,  TextSegment } from "node-napcat-ts/dist/Structs.js";
+import { Botconfig as config, PermissionConfig } from './config.js'
+import { ImageSegment, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
 import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { count } from "node:console";
@@ -23,7 +23,7 @@ import { IsPermission } from "./Permission.js";
 
 //WSSendParam
 
-const CMD_PREFIX = config?.cmd?.prefix??'#'; 
+const CMD_PREFIX = config?.cmd?.prefix ?? '#';
 
 // 导出装饰器
 // export { param, ParamType };
@@ -68,13 +68,13 @@ function findCommand(plugin: Plugin, cmdName: string): Command | undefined {
         // 从完整命令中提取命令名
         const cmdParts = cmd.cmd.split(/\s+/);
         const matchCmd = cmdParts[cmdParts.length - 1] === cmdName;
-        
+
         // 检查别名
         const matchAlias = cmd.aliases?.some((alias: string) => {
             const aliasParts = alias.split(/\s+/);
             return aliasParts[aliasParts.length - 1] === cmdName;
         });
-        
+
         return matchCmd || matchAlias;
     });
 }
@@ -86,14 +86,16 @@ async function loadPlugins(): Promise<void> {
     try {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const pluginsDir = path.join(__dirname, '..', 'plugins');
+
+        // 删除require缓存相关代码
         const files = await fsPromises.readdir(pluginsDir);
-        
+
         for (const file of files) {
-            if (file.endsWith('.js') && file !== 'index.ts') {
+            if (file.endsWith('.ts') && file !== 'index.ts') {
                 const filePath = path.join(pluginsDir, file);
                 try {
-                    // 动态导入插件
-                    const module = await import(filePath);
+                    // 使用ESM动态导入并添加时间戳防止缓存
+                    const module = await import(`${filePath}?t=${Date.now()}`);
                     const pluginClasses = Object.values(module).filter(
                         value => typeof value === 'function' && value.prototype?.plugincfg
                     );
@@ -101,7 +103,7 @@ async function loadPlugins(): Promise<void> {
                     for (const PluginClass of pluginClasses) {
                         const instance = new (PluginClass as any)();
                         const pluginConfig = instance.constructor.prototype.plugincfg;
-                        
+
                         if (pluginConfig) {
                             const plugin: Plugin = {
                                 id: pluginConfig.id,
@@ -154,7 +156,7 @@ async function initializePluginCommands(instance: any): Promise<void> {
 async function initializeScheduledTasks(instance: any): Promise<void> {
     const methods = Object.getOwnPropertyNames(instance.constructor.prototype)
         .filter(name => name !== 'constructor');
-    
+
     for (const methodName of methods) {
         const method = instance.constructor.prototype[methodName];
         if (method.isScheduled) {
@@ -180,6 +182,15 @@ async function initializeScheduledTasks(instance: any): Promise<void> {
 // 修改 runplugins 函数
 export async function runplugins() {
     try {
+        // 清理旧实例
+        commandList.forEach(plugin => {
+            plugin.commands.forEach(cmd => {
+                // 检查 cmd.fn 是否存在，并且是否有 close 方法
+                if (cmd.fn && typeof (cmd.fn as any).close === 'function') {
+                    (cmd.fn as any).close();
+                }
+            });
+        });
 
         // 清空现有命令列表
         commandList.length = 0;
@@ -194,7 +205,7 @@ export async function runplugins() {
                     return;
                 }
                 const msg = context.message[0].data.text || '';
-                botlogger.info('收到消息:'+ context.message[0].data.text);
+                botlogger.info('收到消息:' + context.message[0].data.text);
                 // 检查是否是命令
                 if (!msg.startsWith(CMD_PREFIX)) {
                     return;
@@ -238,8 +249,8 @@ export async function runplugins() {
 
                 botlogger.info(`找到命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                 //指令权限检查
-                if(context.message_type === 'private'){
-                    if(!await IsPermission(context.user_id,plugin.id,command.cmd)){
+                if (context.message_type === 'private') {
+                    if (!await IsPermission(context.user_id, plugin.id, command.cmd)) {
                         botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
@@ -248,13 +259,13 @@ export async function runplugins() {
                         return;
                     }
                 }
-                if(context.message_type === 'group'){
-                    if(!await IsPermission(context.group_id,plugin.id,command.cmd)){
+                if (context.message_type === 'group') {
+                    if (!await IsPermission(context.group_id, plugin.id, command.cmd)) {
                         botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
                             data: { text: `你没有权限执行此命令` }
-                       }])
+                        }])
                         return;
                     }
                 }
@@ -278,7 +289,7 @@ export async function runplugins() {
                 botlogger.info(`  ${CMD_PREFIX}${plugin.id} ${cmd.cmd}`);
             }
         }
-        
+
     } catch (error) {
         botlogger.error("注册插件时出错:", error);
     }
@@ -294,7 +305,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
         const message = context.message[0].data.text || '';
         const parsedArgs = await parseCommandParams(message, context);
 
-        botlogger.info('命令参数解析完成:'+ JSON.stringify({
+        botlogger.info('命令参数解析完成:' + JSON.stringify({
             command: command.cmd,
             args: parsedArgs.slice(0, -1) // 不显示 context 对象
         }));
@@ -305,7 +316,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
 
         // 检查是否是群消息
         const isGroupMessage = context.message_type === 'group';
-        const baseMessage = isGroupMessage && context.message_id 
+        const baseMessage = isGroupMessage && context.message_id
             ? [createReplyMessage(context.message_id)]
             : [];
 
@@ -433,10 +444,10 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
             botlogger.error(`未找到插件配置: ${target.constructor.name}`);
             return descriptor;
         }
-        
+
         const pluginId = pluginConfig.id;
         const pluginName = pluginConfig.name;
-        
+
         // 获或创建插件的命令列表
         let plugin = commandList.find((p: Plugin) => p.class === target.constructor);
         if (!plugin) {
@@ -453,7 +464,7 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
         // 使用新的命令格式
         const cmdList = Array.isArray(cmd) ? cmd : [cmd];
         const [mainCmd, ...aliases] = cmdList;
-        
+
         // 修改命令创建
         const command: Command = {
             cmd: mainCmd,
@@ -468,10 +479,10 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
                 sendText: true
             }
         };
-        
+
         plugin.commands.push(command);
         botlogger.info(`注册命令[${pluginId}]: ${CMD_PREFIX}${pluginId} ${mainCmd}`);
-        
+
         return descriptor;
     };
 }
@@ -480,7 +491,7 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
 // 修改参数解析函数
 async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage): Promise<any[]> {
     const cmdArgs = message.split(/\s+/).filter(Boolean);
-    
+
     // 移除命令前缀和命令名
     const cmdPrefix = '#';
     const parts = message.split(/\s+/);
@@ -495,12 +506,12 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
     }));
 
     const params: any[] = [];
-    
+
     // 添加参数
     if (paramArgs.length > 0) {
         // 第一个参数作为字符串
         params.push(paramArgs[0]);
-        
+
         // 第二个参数尝试转换为数字
         if (paramArgs.length > 1) {
             const num = Number(paramArgs[1]);

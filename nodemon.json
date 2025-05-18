@@ -1,0 +1,8 @@
+{
+  "watch": ["src"],
+  "ext": "ts yml",
+  "exec": "node --no-warnings --loader=ts-node/esm --experimental-specifier-resolution=node --import=ts-node/esm src/app.ts",
+  "env": {
+    "NODE_OPTIONS": "--experimental-vm-modules"
+  }
+}

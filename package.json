@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cp -R ./src/config/ ./dist/ && cp -R ./src/resources/ ./dist/ && tsc",
-    "dev": "nodemon --exec \"node --no-warnings --loader ts-node/esm --import tsconfig-paths/register src/app.ts\"",
+    "dev": "nodemon --watch src --ext ts,yml --exec \"node --no-warnings --loader=ts-node/esm --import=ts-node/esm src/app.ts\"",
     "start": "npm run build && node dist/app.js"
   },
   "keywords": [],
@@ -21,7 +21,6 @@
     "node-napcat-ts": "^0.4.0",
     "puppeteer": "^23.9.0",
     "reflect-metadata": "^0.2.2",
-    "ts-node": "^10.9.2",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
     "yaml": "^2.6.1"
@@ -29,11 +28,12 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
-    "@types/node": "^16.0.0",
+    "@types/node": "^16.18.126",
     "@types/node-cron": "^3.0.11",
     "@types/winston": "^2.4.4",
     "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^4.5.0"
+    "typescript": "^4.9.5"
   }
 }
