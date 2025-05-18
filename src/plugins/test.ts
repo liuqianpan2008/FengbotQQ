@@ -1,7 +1,9 @@
-import { param, ParamType, plugins, runcod } from '../lib/decorators.js';
+import { param, ParamType, plugins, runcod, schedule } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
+import { qqBot } from '../app.js';
+import botlogger from '@/lib/logger.js';
 
 @plugins({
     id: "test", //插件ID，必须唯一，不能重复
@@ -45,6 +47,11 @@ export class Test {
                 return `参数1(字符串): ${param1}\n参数2(数字): ${param2}`;
             }
         };
+    }
+
+    @schedule('* */30 * * * *') // 每30分钟执行一次
+    async testschedule() {
+        botlogger.info("定时任务测试")
     }
 
 }
