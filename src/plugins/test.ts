@@ -3,7 +3,7 @@ import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
 import { qqBot } from '../app.js';
-import botlogger from '@/lib/logger.js';
+import botlogger from '../lib/logger.js';
 
 @plugins({
     id: "test", //插件ID，必须唯一，不能重复
