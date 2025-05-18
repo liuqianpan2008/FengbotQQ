@@ -19,7 +19,7 @@ import { qqBot } from '../app.js';
     }
 })
 export class downloadPlugins {
-    @runcod(["download","下载插件"], "下载插件")//命令装饰器，用于注册命令
+    @runcod(["download", "下载插件"], "下载插件")//命令装饰器，用于注册命令
     async param(
         @param("插件名称", ParamType.String) pluName: string,
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
@@ -30,23 +30,23 @@ export class downloadPlugins {
         const pluginsDir = path.join(__dirname, '..', 'plugins');
         try {
             const files = await fs.readdir(pluginsDir);
-            const foundFiles = files.filter(file => 
-                (file.endsWith('.ts') || file.endsWith('.js')) && 
+            const foundFiles = files.filter(file =>
+                (file.endsWith('.ts') || file.endsWith('.js')) &&
                 file !== 'index.ts'
             );
-        
+
             // 在服务器日志中输出找到的文件列表
             botlogger.info(`找到插件文件：${foundFiles.join(', ')}`);
-            
+
             // 根据文件名查找具体插件
-            const targetFile = foundFiles.find((file: string) => 
+            const targetFile = foundFiles.find((file: string) =>
                 path.parse(file).name.toLowerCase() === pluName.toLowerCase()
             );
-        
+
             if (!targetFile) {
                 return `未找到名为 ${pluName} 的插件`;
             }
-        
+
             // 返回文件完整路径
             const fullPath = path.join(pluginsDir, targetFile);
             //.toString('base64'
@@ -56,25 +56,25 @@ export class downloadPlugins {
             if (isGroupMessage && context.group_id) {
                 await qqBot.upload_group_file({
                     group_id: Number(context.group_id),
-                    file: 'data:file;base64,'+file,
+                    file: 'data:file;base64,' + file,
                     name: pluName
                 })
-                
+
             } else {
                 await qqBot.upload_private_file({
                     user_id: Number(context.sender.user_id),
-                    file: 'data:file;base64,'+file,
+                    file: 'data:file;base64,' + file,
                     name: pluName
                 })
             }
-           
-            return'上传成功';
+
+            return '上传成功';
         } catch (error) {
             botlogger.error('文件查找失败：', error);
             return '插件查找服务暂不可用';
         }
     }
-    @runcod(["plugins","插件列表"], "查看插件文件")//命令装饰器，用于注册命令
+    @runcod(["plugins", "插件列表"], "查看插件文件")//命令装饰器，用于注册命令
     async plugins(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
@@ -84,11 +84,79 @@ export class downloadPlugins {
         const pluginsDir = path.join(__dirname, '..', 'plugins');
         try {
             const files = await fs.readdir(pluginsDir);
-            const foundFiles = files.filter(file => 
-                (file.endsWith('.ts') || file.endsWith('.js')) && 
+            const foundFiles = files.filter(file =>
+                (file.endsWith('.ts') || file.endsWith('.js')) &&
                 file !== 'index.ts'
             );
+            return `找到日志文件：${foundFiles.join(', ')}`;
+        } catch (error) {
+            botlogger.error('文件查找失败：', error);
+            return '插件查找服务暂不可用';
+        }
+    }
+    @runcod(["logs", "日志"], "获取日志")
+    async getloglist() {
+        // pluName += ".ts"
+        const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        // 查找插件目录下的文件
+        const pluginsDir = path.join(__dirname, '..', '..','logs');
+        try {
+            const files = await fs.readdir(pluginsDir);
+            const foundFiles = files.filter(file =>
+                (file.endsWith('.log'))
+            );
             return `找到插件文件：${foundFiles.join(', ')}`;
+        } catch (error) {
+            botlogger.error('文件查找失败：', error);
+            return '插件查找服务暂不可用';
+        }
+    }
+    @runcod(["downloadlog", "getlog"], "下载日志")//命令装饰器，用于注册命令
+    async getlogs(
+        @param("日志名称", ParamType.String) pluName: string,
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ): Promise<any> {
+        // pluName += ".ts"
+        const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        // 查找插件目录下的文件
+        const pluginsDir = path.join(__dirname, '..', '..','logs');
+        try {
+            const files = await fs.readdir(pluginsDir);
+            const foundFiles = files.filter(file =>
+                (file.endsWith('.log'))
+            );
+
+            // 根据文件名查找具体插件
+            const targetFile = foundFiles.find((file: string) =>
+                path.parse(file).name.toLowerCase() === pluName.toLowerCase()
+            );
+
+            if (!targetFile) {
+                return `未找到名为 ${pluName} 的日志`;
+            }
+
+            // 返回文件完整路径
+            const fullPath = path.join(pluginsDir, targetFile);
+            //.toString('base64'
+
+            const file = Buffer.from(await fs.readFile(fullPath, { encoding: "utf-8" })).toString('base64')
+            const isGroupMessage = context.message_type === 'group';
+            if (isGroupMessage && context.group_id) {
+                await qqBot.upload_group_file({
+                    group_id: Number(context.group_id),
+                    file: 'data:file;base64,' + file,
+                    name: pluName
+                })
+
+            } else {
+                await qqBot.upload_private_file({
+                    user_id: Number(context.sender.user_id),
+                    file: 'data:file;base64,' + file,
+                    name: pluName
+                })
+            }
+
+            return '上传成功';
         } catch (error) {
             botlogger.error('文件查找失败：', error);
             return '插件查找服务暂不可用';

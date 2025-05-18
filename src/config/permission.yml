@@ -19,6 +19,8 @@ users:
           download: true
           help: true
           plugins: true
+          logs: true
+          downloadlog: true
       saku:
         commands:
           ping: true
