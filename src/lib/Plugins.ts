@@ -263,6 +263,16 @@ export async function runplugins() {
                                 type: 'text',
                                 data: {text: `插件下载完成,开始重载`}
                             }]);
+                            let isload = load
+                            isload.isuplad=true;
+                            isload.name=pluginName
+                            if((context.message_type === 'group')){
+                                isload.id = context.group_id
+                            }else{
+                                isload.id = context.sender.user_id
+                            }
+                            isload.isGroupMessage = (context.message_type === 'group');
+                            saveConfig("load", isload)
                         }
                     }
                 }
