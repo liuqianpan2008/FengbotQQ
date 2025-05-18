@@ -76,3 +76,6 @@ coverage/
 
 # 测试文件
 test/
+
+src/plugins/*
+!src/plugins/upload.ts
