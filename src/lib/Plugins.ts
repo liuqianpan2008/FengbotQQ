@@ -512,7 +512,18 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                 });
             }
 
-        } else {
+        }
+
+        else if (typeof result?.redirect == "string") {
+            const targetCommand = findCommand(plugin, result.redirect);
+            if (!targetCommand) {
+                botlogger.info(`命令未找到: ${result.redirect}`);
+                return;
+            }
+            return await handleCommand(context, plugin, targetCommand, args);
+        }
+
+        else {
             // 发送普通文本响应
             const message = [...baseMessage, createTextMessage(result)];
 
