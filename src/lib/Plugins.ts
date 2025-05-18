@@ -253,11 +253,9 @@ export async function runplugins() {
                         if (pluginName.endsWith(".ts")) {
 
                             botlogger.info("开始安装插件: " + pluginName);
-
+                            const __dirname = path.dirname(fileURLToPath(import.meta.url));
                             // @ts-ignore
-                            fs.writeFile(`../plugins/${pluginName}`, msg, "utf8", (e) => {
-                                botlogger.error("插件安装失败: " + JSON.stringify(e));
-                            });
+                            fs.writeFileSync(path.join(__dirname, "..", "plugins", pluginName), msg, "utf8");
 
                             context.quick_action([{
                                 type: 'text',

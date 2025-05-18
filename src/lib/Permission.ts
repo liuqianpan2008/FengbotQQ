@@ -1,6 +1,6 @@
 import { PermissionConfig, saveConfig } from "./config.js";
 import botlogger from "./logger.js";
-
+export const IsAdmin = function (id:number){return  PermissionConfig.admins.some((admin: string) => admin === String(id)) }
 export async function IsPermission(id: number, plugin: string, command: string): Promise<boolean> {
     try {
         // 检查用户是否在白名单中
