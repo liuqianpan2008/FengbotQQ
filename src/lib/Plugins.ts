@@ -428,6 +428,26 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                     });
                 }
             }
+        } else if (result?.picture?.enabled) {
+
+            const messages: any[] = [createImageMessage(result.picture.base64)];
+
+            if (typeof result.picture.supplement == "string") {
+                messages.push(createTextMessage(result.picture.supplement));
+            }
+
+            if (isGroupMessage && context.group_id) {
+                await qqBot.send_group_msg({
+                    group_id: Number(context.group_id),
+                    message: messages
+                });
+            } else {
+                await qqBot.send_private_msg({
+                    user_id: Number(context.user_id),
+                    message: messages
+                });
+            }
+
         } else {
             // 发送普通文本响应
             const message = [...baseMessage, createTextMessage(result)];
