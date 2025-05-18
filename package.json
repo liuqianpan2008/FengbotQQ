@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && cp -R config/ resources/ dist/",
+    "build": "cp -R ./src/config/ ./dist/ && cp -R ./src/resources/ ./dist/ && tsc",
     "dev": "nodemon --exec \"node --no-warnings --loader ts-node/esm --import tsconfig-paths/register src/app.ts\"",
     "start": "npm run build && node dist/app.js"
   },
