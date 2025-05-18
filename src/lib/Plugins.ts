@@ -19,7 +19,7 @@ import {
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
-import {Botconfig as config, PermissionConfig} from './config.js'
+import {Botconfig as config, load, PermissionConfig, saveConfig} from './config.js'
 import {ImageSegment, ReplySegment, TextSegment} from "node-napcat-ts/dist/Structs.js";
 import {fileURLToPath} from 'node:url';
 import {qqBot} from "../app.js";
