@@ -1,40 +1,33 @@
 
 import botlogger from "./logger.js";
-import {promises as fsPromises} from 'fs';
-import {HtmlImg} from "./Puppeteer.js";
+import { promises as fsPromises } from 'fs';
+import { HtmlImg } from "./Puppeteer.js";
 import type {
     GroupMessage,
-    EventHandleMap as MessageContext,
     PrivateFriendMessage,
     PrivateGroupMessage
 } from 'node-napcat-ts/dist/Interfaces.js';
 import * as cron from 'node-cron';
 import 'reflect-metadata';
-import {
-    ParamType,
-    commandList,
-    Command,
-    Plugin,
-} from './decorators.js';
+import { Command, Plugin, } from '../interface/plugin.js';
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
-import {Botconfig as config, load, PermissionConfig, saveConfig} from './config.js'
-import {ImageSegment, ReplySegment, TextSegment} from "node-napcat-ts/dist/Structs.js";
-import {fileURLToPath} from 'node:url';
-import {qqBot} from "../app.js";
-import {count} from "node:console";
-import {IsPermission} from "./Permission.js";
-import {download} from "./download.js";
+import { Botconfig as config, load, PermissionConfig, saveConfig } from './config.js'
+import { ImageSegment, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
+import { fileURLToPath } from 'node:url';
+import { qqBot } from "../app.js";
+import { IsPermission } from "./Permission.js";
+import { download } from "./download.js";
+import { commandList } from "./decorators.js";
 
 //WSSendParam
-
 const CMD_PREFIX = config?.cmd?.prefix ?? '#';
-
+export const getCommands = () => commandList;
 // 导出装饰器
 // export { param, ParamType };
 // export const plugins = pluginsDecorator;
-export {config};  // 导出配置对象
+export { config };  // 导出配置对象
 // 创建消息工厂函数
 function createTextMessage(text: string): TextSegment {
     return {
@@ -85,12 +78,11 @@ function findCommand(plugin: Plugin, cmdName: string): Command | undefined {
     });
 }
 
-
-
 // 添加插件加载函数
 async function loadPlugins(): Promise<void> {
     try {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
         const pluginsDir = path.join(__dirname, '..', 'plugins');
 
         // 删除require缓存相关代码
@@ -184,8 +176,6 @@ async function initializeScheduledTasks(instance: any): Promise<void> {
     }
 }
 
-
-
 // 修改 runplugins 函数
 export async function runplugins() {
     try {
@@ -217,7 +207,7 @@ export async function runplugins() {
                         if (!isAdmin) {
                             context.quick_action([{
                                 type: 'text',
-                                data: {text: `无权限，无法加载插件`}
+                                data: { text: `无权限，无法加载插件` }
                             }]);
                             return;
                         }
@@ -226,18 +216,18 @@ export async function runplugins() {
                         botlogger.info("下载完成:" + JSON.stringify(file));
                         context.quick_action([{
                             type: 'text',
-                            data: {text: `插件下载完成,开始重载`}
+                            data: { text: `插件下载完成,开始重载` }
                         }]);
                         let isload = load
-                            isload.isuplad=true;
-                            isload.name=file.file
-                            if((context.message_type === 'group')){
-                                isload.id = context.group_id
-                            }else{
-                                isload.id = context.sender.user_id
-                            }
-                            isload.isGroupMessage = (context.message_type === 'group');
-                            saveConfig("load", isload)
+                        isload.isuplad = true;
+                        isload.name = file.file
+                        if ((context.message_type === 'group')) {
+                            isload.id = context.group_id
+                        } else {
+                            isload.id = context.sender.user_id
+                        }
+                        isload.isGroupMessage = (context.message_type === 'group');
+                        saveConfig("load", isload)
                     }
                     return;
                 }
@@ -257,7 +247,7 @@ export async function runplugins() {
                             if (!isAdmin) {
                                 context.quick_action([{
                                     type: 'text',
-                                    data: {text: `无权限，无法加载插件`}
+                                    data: { text: `无权限，无法加载插件` }
                                 }]);
                                 return;
                             }
@@ -269,14 +259,14 @@ export async function runplugins() {
 
                             context.quick_action([{
                                 type: 'text',
-                                data: {text: `插件下载完成,开始重载`}
+                                data: { text: `插件下载完成,开始重载` }
                             }]);
                             let isload = load
-                            isload.isuplad=true;
-                            isload.name=pluginName
-                            if((context.message_type === 'group')){
+                            isload.isuplad = true;
+                            isload.name = pluginName
+                            if ((context.message_type === 'group')) {
                                 isload.id = context.group_id
-                            }else{
+                            } else {
                                 isload.id = context.sender.user_id
                             }
                             isload.isGroupMessage = (context.message_type === 'group');
@@ -356,7 +346,7 @@ export async function runplugins() {
                         botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
-                            data: {text: `你没有权限执行此命令`}
+                            data: { text: `你没有权限执行此命令` }
                         }]);
                         return;
                     }
@@ -366,7 +356,7 @@ export async function runplugins() {
                         botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
-                            data: {text: `你没有权限执行此命令`}
+                            data: { text: `你没有权限执行此命令` }
                         }])
                         return;
                     }
@@ -378,7 +368,7 @@ export async function runplugins() {
                 botlogger.error("处理消息时出错:", error);
                 await context.quick_action([{
                     type: 'text',
-                    data: {text: `处理消息时出错: ${error instanceof Error ? error.message : '未知错误'}`}
+                    data: { text: `处理消息时出错: ${error instanceof Error ? error.message : '未知错误'}` }
                 }]);
             }
         });
@@ -560,7 +550,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
         const errorMessage = error instanceof Error ? error.message : '未知错误';
         await context.quick_action([{
             type: 'text',
-            data: {text: `执行命令时出错: ${errorMessage}`}
+            data: { text: `执行命令时出错: ${errorMessage}` }
         }]);
     }
 }
@@ -569,9 +559,6 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
 export async function loadplugins() {
     await runplugins();
 }
-
-export const getCommands = () => commandList;
-
 
 // 修改 runcod 装饰器
 export function runcod(cmd: string | string[], desc: string): MethodDecorator {
@@ -654,8 +641,8 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
                 params.push(num);
             }
             params.push(paramArgs[i]);
-            
-        }  
+
+        }
     }
     // 添加 context 参数
     params.push(context);

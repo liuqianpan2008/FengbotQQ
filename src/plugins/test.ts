@@ -1,11 +1,12 @@
 //PLUGIN test.ts
 
-import { param, ParamType, plugins, runcod, schedule } from '../lib/decorators.js';
+import { param, plugins, runcod, schedule } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
 import { qqBot } from '../app.js';
 import botlogger from '../lib/logger.js';
+import { ParamType } from '../interface/plugin.js';
 
 @plugins({
     id: "test", //插件ID，必须唯一，不能重复

@@ -1,4 +1,4 @@
-import { param, ParamType, plugins, runcod } from '../lib/decorators.js';
+import { param, plugins, runcod } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
@@ -6,6 +6,7 @@ import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-na
 import botlogger from '../lib/logger.js';
 import fs from 'fs/promises';
 import { qqBot } from '../app.js';
+import { ParamType } from '@/interface/plugin.js';
 
 @plugins({
     id: "downloadPlugins", //插件ID，必须唯一，不能重复
