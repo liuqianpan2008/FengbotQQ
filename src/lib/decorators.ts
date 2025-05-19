@@ -95,11 +95,13 @@ export function plugins(config: PluginConfig): ClassDecorator {
                     const commands = plugin.commands
                         .filter(cmd => !cmd.cmd.endsWith('help'))
                         .map(cmd => {
-                            const fullCmd = `${CMD_PREFIX}${plugin.id} ${cmd.cmd}`;
+                            let fullCmd = `${CMD_PREFIX}${plugin.id} ${cmd.cmd}`;
                             const aliases = cmd.aliases?.map(alias =>
                                 `${CMD_PREFIX}${plugin.id} ${alias}`
                             ) || [];
-
+                            paramMetadata.get(config.id + '.' + cmd.cmd)?.forEach((param: ParamMetadata) => {
+                                param.optional ? fullCmd += ` [${param.name}]` : fullCmd += ` <${param.name}>`;
+                            })
                             return {
                                 name: cmd.cmd,
                                 fullCmd,
@@ -175,7 +177,6 @@ export function plugins(config: PluginConfig): ClassDecorator {
  * @param desc - 命令描述
  * @param config - 命令配置
  */
-//权限
 export function runcod(cmd: string | string[], desc: string, config: CommandConfig = {}, IsTest = false): MethodDecorator {
     return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
         // 延迟执行命令注册

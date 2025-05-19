@@ -78,4 +78,5 @@ coverage/
 test/
 
 src/plugins/*
-!src/plugins/upload.ts
+!src/plugins/PluginsFile.ts
+!src/plugins/test.ts
