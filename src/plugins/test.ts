@@ -9,7 +9,7 @@ import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
 
 @plugins({
-    id: "test", //插件ID，必须唯一，不能重复
+    id: "test", //插件ID，需与类名一致，唯一
     name: "测试插件", //插件名称，用于显示在菜单中
     version: "1.0.0", //插件版本号，用于显示在菜单中
     describe: "测试功能", //插件描述，用于显示在菜单中
@@ -19,7 +19,7 @@ import { ParamType } from '../interface/plugin.js';
         description: "显示帮助信息" //帮助信息描述
     }
 })
-export class Test {
+export class test {
     @runcod(["param"], "参数实例")//命令装饰器，用于注册命令
     async param(
         @param("参数1", ParamType.String) param1: string,//参数装饰器，用于解析参数
@@ -54,7 +54,7 @@ export class Test {
 
     @schedule('* */30 * * * *') // 每30分钟执行一次
     async testschedule() {
-        botlogger.info("定时任务测试")
+        // botlogger.info("定时任务测试")
     }
 
 }

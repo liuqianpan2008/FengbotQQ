@@ -11,7 +11,7 @@ import { Plugin } from '../interface/plugin.js';
 
 
 // 存储参数元数据
-export const paramMetadata = new Map<Function, ParamMetadata[]>();
+export const paramMetadata = new Map<string, ParamMetadata[]>();
 // 存储命令的数组
 export const commandList: Plugin[] = [];
 
@@ -20,12 +20,13 @@ export function param(name: string, type: ParamType = ParamType.String, optional
 
     return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number): void {
         const actualPropertyKey = propertyKey!;
-        const fn = target[actualPropertyKey];
-        let metadata = paramMetadata.get(fn);
+        //获得fn所在的类名和方法名
+        const fnName = `${target.constructor.name}.${actualPropertyKey.toString()}`;
+        let metadata = paramMetadata.get(fnName);
 
         if (!metadata) {
             metadata = [];
-            paramMetadata.set(fn, metadata);
+            paramMetadata.set(fnName, metadata);
         }
 
         const paramData: ParamMetadata = {
@@ -152,7 +153,6 @@ export function plugins(config: PluginConfig): ClassDecorator {
                         }
                     };
                 },
-                paramMetadata: []
             };
 
             plugin.commands.push(helpCommand);
@@ -226,7 +226,7 @@ export function runcod(cmd: string | string[], desc: string, config: CommandConf
                         sendText: IsTest, // 默认不发送文本,
                         ...(config.template || {})
                     },
-                    paramMetadata: []
+                    paramdata: paramMetadata.get(target.constructor.prototype[propertyKey]) || [],
                 };
 
                 plugin.commands.push(command);

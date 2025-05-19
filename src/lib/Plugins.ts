@@ -9,7 +9,7 @@ import type {
 } from 'node-napcat-ts/dist/Interfaces.js';
 import * as cron from 'node-cron';
 import 'reflect-metadata';
-import { Command, Plugin, } from '../interface/plugin.js';
+import { Command, ParamMetadata, Plugin, } from '../interface/plugin.js';
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
@@ -19,11 +19,10 @@ import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { IsPermission } from "./Permission.js";
 import { download } from "./download.js";
-import { commandList } from "./decorators.js";
+import { commandList, paramMetadata } from "./decorators.js";
 
 //WSSendParam
 const CMD_PREFIX = config?.cmd?.prefix ?? '#';
-export const getCommands = () => commandList;
 // 导出装饰器
 // export { param, ParamType };
 // export const plugins = pluginsDecorator;
@@ -395,7 +394,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
             throw new Error('消息内容为空');
         }
         const message = context.message[0].data.text || '';
-        const parsedArgs = await parseCommandParams(message, context);
+        const parsedArgs = await parseCommandParams(message, context, command);
 
         botlogger.info('命令参数解析完成:' + JSON.stringify({
             command: command.cmd,
@@ -604,7 +603,7 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
                 enabled: false,
                 sendText: true
             },
-            paramMetadata: []
+            paramdata: paramMetadata.get(target.constructor.prototype[propertyKey]) || []
         };
 
         plugin.commands.push(command);
@@ -616,7 +615,7 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
 
 
 // 修改参数解析函数
-async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage): Promise<any[]> {
+async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage,command:Command): Promise<any[]> {
     const cmdArgs = message.split(/\s+/).filter(Boolean);
 
     // 移除命令前缀和命令名
@@ -624,25 +623,42 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
     const paramArgs = parts.slice(2); // 跳过 #test param 这两个部分
 
     // 调试日志
-    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({
-        message,
-        cmdArgs,
-        paramArgs,
-        parts
-    }));
+    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({paramArgs}));
 
     const params: any[] = [];
-
-    // 添加参数
-    if (paramArgs.length > 0) {
-        for (let i = 0; i < paramArgs.length; i++) {
-            //数字转化
-            const num = Number(paramArgs[i]);
-            if (!isNaN(num)) {
-                params.push(num);
+    const param = paramMetadata.get(command.pluginId+"."+command.cmd);
+    if (param) {
+        for (const paramData of param) {
+            const { name, type, index, optional } = paramData;
+            const msg= `正确格式为: ${CMD_PREFIX}${command.pluginId} ${command.cmd} ${param.map(p => p.optional ? `[${p.name}]` :`<${p.name}>`).join(' ')}`
+            if (paramArgs.length < param?.length) {
+                throw new Error(`参数不足,${msg}`);
             }
-            params.push(paramArgs[i]);
-
+            if (!optional && !paramArgs[index]) {
+                throw new Error(`参数 <${name}> 是必需的,${msg}`);   
+            }
+            switch (type) {
+                case "string":
+                    params[index] = paramArgs[index] || '';
+                    break;
+                case "number":
+                    params[index] = Number(paramArgs[index]) || 0;
+                    if (isNaN(params[index])) {
+                        throw new Error(`参数 ${name} 必须是数字,${msg}`);
+                    }
+                    break;
+                case "boolean":
+                    params[index] = paramArgs[index] === 'true';
+                        if (optional && paramArgs[index] === undefined) {
+                            params[index] = false;
+                        }
+                    break;
+                case "rest":
+                    params[index] = paramArgs.slice(index);
+                    break;
+                default:
+                    throw new Error(`未知参数类型: ${type},${msg}`);
+            }
         }
     }
     // 添加 context 参数
