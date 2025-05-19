@@ -151,7 +151,8 @@ export function plugins(config: PluginConfig): ClassDecorator {
                             ].filter(Boolean).join('\n');
                         }
                     };
-                }
+                },
+                paramMetadata: []
             };
 
             plugin.commands.push(helpCommand);
@@ -224,7 +225,8 @@ export function runcod(cmd: string | string[], desc: string, config: CommandConf
                         enabled: !IsTest,
                         sendText: IsTest, // 默认不发送文本,
                         ...(config.template || {})
-                    }
+                    },
+                    paramMetadata: []
                 };
 
                 plugin.commands.push(command);

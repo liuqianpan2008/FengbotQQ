@@ -603,7 +603,8 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
             template: {
                 enabled: false,
                 sendText: true
-            }
+            },
+            paramMetadata: []
         };
 
         plugin.commands.push(command);

@@ -39,6 +39,7 @@ export interface Command {
         sendText: boolean;  // 是否发送文本
         [key: string]: any; // 其他模板配置
     };
+    paramMetadata: ParamMetadata[]; // 参数元数据
 }
 // 参数元数据接口
 export interface ParamMetadata {
