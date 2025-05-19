@@ -1,3 +1,5 @@
+//PLUGIN test.ts
+
 import { param, ParamType, plugins, runcod, schedule } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';

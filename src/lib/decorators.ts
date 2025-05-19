@@ -177,7 +177,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
                             sendText: false,
                             render: {
                                 width: 800,
-                                height: 600,
+                                height: 1600,
                                 type: 'png',
                                 quality: 100,
                                 fullPage: false,

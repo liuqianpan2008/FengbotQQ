@@ -9,7 +9,7 @@ users:
         enable: true
         commands:
           help: true
-          param: false
+          param: true
       testupload:
         commands:
           help: true
@@ -26,6 +26,21 @@ users:
           ping: true
           help: true
           图: true
+  '914085636':
+    plugins:
+      saku:
+        commands:
+          help: true
+      reload:
+        commands:
+          help: true
+      downloadPlugins:
+        commands:
+          help: true
+          plugins: true
+          download: true
+          logs: true
+          downloadlog: true
   default:
     plugins:
       test:

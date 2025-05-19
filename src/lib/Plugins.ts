@@ -632,12 +632,11 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
     const cmdArgs = message.split(/\s+/).filter(Boolean);
 
     // 移除命令前缀和命令名
-    const cmdPrefix = '#';
     const parts = message.split(/\s+/);
     const paramArgs = parts.slice(2); // 跳过 #test param 这两个部分
 
     // 调试日志
-    botlogger.info('DEBUG - 命令参数:', JSON.stringify({
+    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({
         message,
         cmdArgs,
         paramArgs,
@@ -648,23 +647,21 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
 
     // 添加参数
     if (paramArgs.length > 0) {
-        // 第一个参数作为字符串
-        params.push(paramArgs[0]);
-
-        // 第二个参数尝试转换为数字
-        if (paramArgs.length > 1) {
-            const num = Number(paramArgs[1]);
+        for (let i = 0; i < paramArgs.length; i++) {
+            //数字转化
+            const num = Number(paramArgs[i]);
             if (!isNaN(num)) {
                 params.push(num);
             }
-        }
+            params.push(paramArgs[i]);
+            
+        }  
     }
-
     // 添加 context 参数
     params.push(context);
 
     // 调试日志
-    botlogger.info('DEBUG - 最终参数:', JSON.stringify({
+    botlogger.info('DEBUG - 最终参数:' + JSON.stringify({
         params: params.slice(0, -1), // 不显示 context
         paramCount: params.length,
         paramArgs
