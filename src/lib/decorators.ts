@@ -226,7 +226,6 @@ export function runcod(cmd: string | string[], desc: string, config: CommandConf
                         sendText: IsTest, // 默认不发送文本,
                         ...(config.template || {})
                     },
-                    paramdata: paramMetadata.get(target.constructor.prototype[propertyKey]) || [],
                 };
 
                 plugin.commands.push(command);

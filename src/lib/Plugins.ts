@@ -603,7 +603,6 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
                 enabled: false,
                 sendText: true
             },
-            paramdata: paramMetadata.get(target.constructor.prototype[propertyKey]) || []
         };
 
         plugin.commands.push(command);
