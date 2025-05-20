@@ -121,7 +121,7 @@ export class PluginsFile {
 
     @runcod(["downloadlog", "getlog"], "下载日志")
     async getlogs(
-        @param("日志名称", ParamType.String) pluName: string,
+        @param("日志名称", ParamType.String) logName: string,
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
         // pluName += ".ts"
@@ -136,11 +136,11 @@ export class PluginsFile {
 
             // 根据文件名查找具体插件
             const targetFile = foundFiles.find((file: string) =>
-                path.parse(file).name.toLowerCase() === pluName.toLowerCase()
+                path.parse(file).name.toLowerCase() === logName.toLowerCase()
             );
 
             if (!targetFile) {
-                return `未找到名为 ${pluName} 的日志`;
+                return `未找到名为 ${logName} 的日志`;
             }
 
             // 返回文件完整路径
@@ -153,14 +153,14 @@ export class PluginsFile {
                 await qqBot.upload_group_file({
                     group_id: Number(context.group_id),
                     file: 'data:file;base64,' + file,
-                    name: pluName+'.log'
+                    name: logName+'.log'
                 })
 
             } else {
                 await qqBot.upload_private_file({
                     user_id: Number(context.sender.user_id),
                     file: 'data:file;base64,' + file,
-                    name: pluName+'.log'
+                    name: logName+'.log'
                 })
             }
 

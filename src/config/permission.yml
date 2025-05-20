@@ -26,6 +26,13 @@ users:
           ping: true
           help: true
           图: true
+      sakulass:
+        commands:
+          图: true
+          help: true
+      PluginsFile:
+        commands:
+          help: true
   '914085636':
     plugins:
       saku:
