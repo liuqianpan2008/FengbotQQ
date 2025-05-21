@@ -19,6 +19,22 @@ import { ParamType } from '../interface/plugin.js';
     }
 })
 export class test {
+    constructor() {
+        //构造函数内可以再次注册qqBot的事件
+        qqBot.on('message', async (event) => {
+            event.message.forEach(async (message) => {
+                if (message.type === 'text') {
+                    if (message.data.text === '自测') {
+                        await event.quick_action([{
+                            type: 'text',
+                            data: { text: `插件加载事件测试` }
+                        }]);
+                    }
+                }
+            })
+        })
+        botlogger.info("测试插件加载成功")
+    }
     @runcod(["param"], "参数实例")//命令装饰器，用于注册命令
     async param(
         @param("参数1", ParamType.String) param1: string,//参数装饰器，用于解析参数
