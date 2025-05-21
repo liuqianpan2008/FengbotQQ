@@ -29,6 +29,7 @@ export interface PluginConfig {
 export interface Command {
     cmd: string;        // 命令名称
     desc: string;       // 命令描述
+    fnName: string;    // 函数名称
     fn: Function;       // 命令函数
     aliases?: string[]; // 命令别名
     cmdPrefix: string;  // 命令前缀

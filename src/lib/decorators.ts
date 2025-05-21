@@ -84,6 +84,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
                 cmdPrefix: CMD_PREFIX,
                 pluginId: config.id,
                 class: target,
+                fnName: 'help',
                 fn: async function (): Promise<object> {
                     const plugin = commandList.find(p => p.class === target);
                     if (!plugin) {
@@ -99,7 +100,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
                             const aliases = cmd.aliases?.map(alias =>
                                 `${CMD_PREFIX}${plugin.id} ${alias}`
                             ) || [];
-                            paramMetadata.get(config.id + '.' + cmd.cmd)?.forEach((param: ParamMetadata) => {
+                            paramMetadata.get(config.id + '.' + cmd.fnName)?.forEach((param: ParamMetadata) => {
                                 param.optional ? fullCmd += ` [${param.name}]` : fullCmd += ` <${param.name}>`;
                             })
                             return {
@@ -217,6 +218,7 @@ export function runcod(cmd: string | string[], desc: string, config: CommandConf
                 const command: Command = {
                     cmd: mainCmd,
                     desc,
+                    fnName: propertyKey.toString(),
                     fn: descriptor.value,
                     aliases,
                     cmdPrefix: CMD_PREFIX,

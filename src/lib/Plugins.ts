@@ -595,6 +595,7 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
             cmd: mainCmd,
             desc,
             fn: descriptor.value,
+            fnName: propertyKey.toString(),
             aliases,
             cmdPrefix: CMD_PREFIX,
             pluginId: pluginId,
@@ -625,7 +626,7 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
     botlogger.info('DEBUG - 命令参数:' + JSON.stringify({paramArgs}));
 
     const params: any[] = [];
-    const param = paramMetadata.get(command.pluginId+"."+command.cmd);
+    const param = paramMetadata.get(command.pluginId+"."+command.fnName);
     if (param) {
         for (const paramData of param) {
             const { name, type, index, optional } = paramData;

@@ -33,6 +33,8 @@ users:
       PluginsFile:
         commands:
           help: true
+          logs: true
+          downloadlog: true
   '914085636':
     plugins:
       saku:
@@ -48,6 +50,15 @@ users:
           download: true
           logs: true
           downloadlog: true
+      sakulass:
+        commands:
+          help: true
+          图: true
+  '1051027747':
+    plugins:
+      sakulass:
+        commands:
+          图: true
   default:
     plugins:
       test:
