@@ -60,7 +60,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
         } else {
             // 添加新插件
             plugin = {
-                id: config.id,
+                id: target.name,
                 name: config.name,
                 class: target,
                 commands: [] as Command[],
@@ -82,7 +82,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
                     sendText: false
                 },
                 cmdPrefix: CMD_PREFIX,
-                pluginId: config.id,
+                pluginId: target.name,
                 class: target,
                 fnName: 'help',
                 fn: async function (): Promise<object> {
@@ -100,7 +100,7 @@ export function plugins(config: PluginConfig): ClassDecorator {
                             const aliases = cmd.aliases?.map(alias =>
                                 `${CMD_PREFIX}${plugin.id} ${alias}`
                             ) || [];
-                            paramMetadata.get(config.id + '.' + cmd.fnName)?.forEach((param: ParamMetadata) => {
+                            paramMetadata.get(target.name + '.' + cmd.fnName)?.forEach((param: ParamMetadata) => {
                                 param.optional ? fullCmd += ` [${param.name}]` : fullCmd += ` <${param.name}>`;
                             })
                             return {

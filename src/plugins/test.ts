@@ -9,7 +9,6 @@ import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
 
 @plugins({
-    id: "test", //插件ID，需与类名一致，唯一
     name: "测试插件", //插件名称，用于显示在菜单中
     version: "1.0.0", //插件版本号，用于显示在菜单中
     describe: "测试功能", //插件描述，用于显示在菜单中

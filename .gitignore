@@ -80,3 +80,4 @@ test/
 src/plugins/*
 !src/plugins/PluginsFile.ts
 !src/plugins/test.ts
+!src/plugins/log.ts
