@@ -12,6 +12,7 @@ export interface Plugin {
 
 // 修改插件装饰器配置接口
 export interface PluginConfig {
+    easycmd?: boolean;
     name: string;// 插件名称
     version?: string;// 插件版本
     describe?: string;// 插件描述

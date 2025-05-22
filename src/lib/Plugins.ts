@@ -59,7 +59,9 @@ function createReplyMessage(messageId: number | string): ReplySegment {
 function findPlugin(pluginId: string): Plugin | undefined {
     return commandList.find((p: Plugin) => p.id === pluginId);
 }
-
+function findeasycmdPlugin(commandId: string): Plugin | undefined {
+    return commandList.find((p: Plugin) => p.config.easycmd === true && p.commands.find((c: Command) => c.cmd === commandId || c.aliases?.includes(commandId)));
+}
 // 修改命令查找函数
 function findCommand(plugin: Plugin, cmdName: string): Command | undefined {
     return plugin.commands.find((cmd: Command) => {
@@ -311,9 +313,43 @@ export async function runplugins() {
                 const plugin = findPlugin(pluginId);
                 if (!plugin) {
                     botlogger.info(`插件未找到: ${pluginId}`);
+                    //尝试easycmd开启的插件
+                    const easyplugin = findeasycmdPlugin(pluginId)
+                    if (!easyplugin) {
+                        botlogger.info(`插件未找到: ${pluginId}`);
+                        return;
+                    }
+                    let command: Command | undefined = undefined;
+                    command = findCommand(easyplugin, pluginId);
+                    if (!command) {
+                        botlogger.info(`命令未找到: ${pluginId}`);
+                        return;
+                    }
+                    //指令权限检查
+                    if (context.message_type === 'private') {
+                        if (!await IsPermission(context.user_id, easyplugin.id, command.cmd)) {
+                            botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${easyplugin.id} ${command.cmd}`);
+                            context.quick_action([{
+                                type: 'text',
+                                data: { text: `你没有权限执行此命令` }
+                            }]);
+                            return;
+                        }
+                    }
+                    if (context.message_type === 'group') {
+                        if (!await IsPermission(context.group_id, easyplugin.id, command.cmd)) {
+                            botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${easyplugin.id} ${command.cmd}`);
+                            context.quick_action([{
+                                type: 'text',
+                                data: { text: `你没有权限执行此命令` }
+                            }])
+                            return;
+                        }
+                    }
+                    // 执行命令
+                    await handleCommand(context, easyplugin, command, parts.slice(1), true);
                     return;
                 }
-
                 botlogger.info(`找到插件[${plugin.id}]: ${plugin.name}`);
 
                 // 显示可用命令
@@ -387,14 +423,14 @@ export async function runplugins() {
 }
 
 // 修改 handleCommand 函数
-async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage, plugin: Plugin, command: Command, args: string[]): Promise<void> {
+async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage, plugin: Plugin, command: Command, args: string[],easycmd:boolean=false): Promise<void> {
     try {
         // 解析参数 - 传入完整消息文本
         if (!context.message[0].type || context.message[0].type !== 'text') {
             throw new Error('消息内容为空');
         }
         const message = context.message[0].data.text || '';
-        const parsedArgs = await parseCommandParams(message, context, command);
+        const parsedArgs = await parseCommandParams(message, context, command,easycmd);
 
         botlogger.info('命令参数解析完成:' + JSON.stringify({
             command: command.cmd,
@@ -615,27 +651,31 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
 
 
 // 修改参数解析函数
-async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage,command:Command): Promise<any[]> {
+async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage, command: Command,easycmd:boolean): Promise<any[]> {
     const cmdArgs = message.split(/\s+/).filter(Boolean);
 
     // 移除命令前缀和命令名
     const parts = message.split(/\s+/);
-    const paramArgs = parts.slice(2); // 跳过 #test param 这两个部分
+    let cmdIndex = 2;
+    if (easycmd) {
+        cmdIndex = 1;
+    }
+    const paramArgs = parts.slice(cmdIndex); 
 
     // 调试日志
-    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({paramArgs}));
+    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({ paramArgs }));
 
     const params: any[] = [];
-    const param = paramMetadata.get(command.pluginId+"."+command.fnName);
+    const param = paramMetadata.get(command.pluginId + "." + command.fnName);
     if (param) {
         for (const paramData of param) {
             const { name, type, index, optional } = paramData;
-            const msg= `正确格式为: ${CMD_PREFIX}${command.pluginId} ${command.cmd} ${param.map(p => p.optional ? `[${p.name}]` :`<${p.name}>`).join(' ')}`
+            const msg = `正确格式为: ${CMD_PREFIX}${command.pluginId} ${command.cmd} ${param.map(p => p.optional ? `[${p.name}]` : `<${p.name}>`).join(' ')}`
             if (paramArgs.length < param?.length) {
                 throw new Error(`参数不足,${msg}`);
             }
             if (!optional && !paramArgs[index]) {
-                throw new Error(`参数 <${name}> 是必需的,${msg}`);   
+                throw new Error(`参数 <${name}> 是必需的,${msg}`);
             }
             switch (type) {
                 case "string":
@@ -649,9 +689,9 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
                     break;
                 case "boolean":
                     params[index] = paramArgs[index] === 'true';
-                        if (optional && paramArgs[index] === undefined) {
-                            params[index] = false;
-                        }
+                    if (optional && paramArgs[index] === undefined) {
+                        params[index] = false;
+                    }
                     break;
                 case "rest":
                     params[index] = paramArgs.slice(index);

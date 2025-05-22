@@ -9,6 +9,7 @@ import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
 
 @plugins({
+    easycmd: true,//是否启用简易命令，启用将将命令注册为#<命令名称>，不启用将注册为#<插件名称> <命令名称>
     name: "测试插件", //插件名称，用于显示在菜单中
     version: "1.0.0", //插件版本号，用于显示在菜单中
     describe: "测试功能", //插件描述，用于显示在菜单中
