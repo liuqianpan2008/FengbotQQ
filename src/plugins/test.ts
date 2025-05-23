@@ -9,7 +9,7 @@ import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
 
 @plugins({
-    easycmd: true,//是否启用简易命令，启用将将命令注册为#<命令名称>，不启用将注册为#<插件名称> <命令名称>
+    easycmd: true,//是否启用简易命令，启用将将命令注册为<命令名称>，不启用将注册为#<插件名称> <命令名称>
     name: "测试插件", //插件名称，用于显示在菜单中
     version: "1.0.0", //插件版本号，用于显示在菜单中
     describe: "测试功能", //插件描述，用于显示在菜单中
@@ -39,7 +39,7 @@ export class test {
     @runcod(["param"], "参数实例")//命令装饰器，用于注册命令
     async param(
         @param("参数1", ParamType.String) param1: string,//参数装饰器，用于解析参数
-        @param("参数2", ParamType.Number) param2: number,//参数装饰器，用于解析参数
+        @param("参数2", ParamType.Number,999,true) param2: number,//参数装饰器，用于解析参数
     ): Promise<any> {
         if (!param1 || !param2) {
             return "请输入正确的参数格式: #test param <字符串> <数字>";//返回错误信息，用于显示在菜单中

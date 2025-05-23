@@ -668,10 +668,17 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
     const params: any[] = [];
     const param = paramMetadata.get(command.pluginId + "." + command.fnName);
     if (param) {
+        let defaultValuei = 0
+        param.forEach((paramData) => {
+            if (paramData.defaultValue) {
+                defaultValuei++    
+            }
+        })
         for (const paramData of param) {
             const { name, type, index, optional } = paramData;
             const msg = `正确格式为: ${CMD_PREFIX}${command.pluginId} ${command.cmd} ${param.map(p => p.optional ? `[${p.name}]` : `<${p.name}>`).join(' ')}`
-            if (paramArgs.length < param?.length) {
+            
+            if (paramArgs.length + defaultValuei < param?.length) {
                 throw new Error(`参数不足,${msg}`);
             }
             if (!optional && !paramArgs[index]) {
@@ -698,6 +705,9 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
                     break;
                 default:
                     throw new Error(`未知参数类型: ${type},${msg}`);
+            }
+            if (optional && paramArgs[index] === undefined) {
+                params[index] = paramData.defaultValue;
             }
         }
     }

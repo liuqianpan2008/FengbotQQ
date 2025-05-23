@@ -46,6 +46,7 @@ export interface ParamMetadata {
     name: string; // 参数名称
     type: ParamType; // 参数类型
     index: number; // 参数索引
+    defaultValue?: any; // 默认值
     optional: boolean; // 是否可选
 }
 // 参数类型枚举

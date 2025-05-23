@@ -16,7 +16,8 @@ export const paramMetadata = new Map<string, ParamMetadata[]>();
 export const commandList: Plugin[] = [];
 
 // 修改参数装饰器
-export function param(name: string, type: ParamType = ParamType.String, optional: boolean = false): ParameterDecorator {
+//默认值
+export function param(name: string, type: ParamType = ParamType.String, defaultValue?:any, optional: boolean = false): ParameterDecorator {
 
     return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number): void {
         const actualPropertyKey = propertyKey!;
@@ -33,6 +34,7 @@ export function param(name: string, type: ParamType = ParamType.String, optional
             name,
             type,
             index: parameterIndex,
+            defaultValue,
             optional: optional
         };
 
