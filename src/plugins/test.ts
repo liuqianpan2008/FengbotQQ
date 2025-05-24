@@ -58,7 +58,7 @@ export class test {
                 path: path.resolve(__dirname, '..', 'resources', 'test', 'param.html'),//模版路径，推荐按规范放置在resources目录下
                 render: {//浏览器默认参数设置，用于打开浏览器的设置
                     width: 600, // 模板宽度
-                    height: 300,// 模板高度
+                    height: 1, // 模板高度
                     type: 'png',// 模板类型
                     quality: 100,// 模板质量
                     fullPage: false,// 是否全屏

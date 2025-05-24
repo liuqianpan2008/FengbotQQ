@@ -29,13 +29,12 @@ export class HtmlImg {
     }) {
         try {
             await this.init();
-
             const {
                 template,
                 templateIsPath = true,
                 data,
                 width = 800,
-                height = 600,
+                height = 1,
                 type = 'png',
                 quality = 100,
                 fullPage = false,
@@ -48,12 +47,19 @@ export class HtmlImg {
             // 渲染HTML
 
             const html = art.render(templateContent, data);
+            // 计算高度
 
             // 创建页面
             const page = await this.browser!.newPage();
             await page.setViewport({ width, height });
             await page.setContent(html, { waitUntil: 'networkidle0' });
-
+            // 获取document.body.scrollHeight
+            
+            const bodyheight = await page.evaluate(() => document.body.scrollHeight)  as number;
+            botlogger.info(`获取body高度${bodyheight}`)
+            if(bodyheight != height){
+                await page.setViewport({ width, height: bodyheight });
+            }
             // 截图
             const image = await page.screenshot({
                 type: type as 'png' | 'jpeg',
