@@ -200,82 +200,10 @@ export async function runplugins() {
         // 设置消息处理器
         qqBot.on('message', async (context) => {
             try {
-                // 检查消息类型和内容
-                if (context.message[0].type === "file") {
-                    const file = context.message[0].data;
-                    botlogger.info("收到文件消息:" + JSON.stringify(file));
-                    if (file.file.includes(".ts")) {
-                        let isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
-                        if (!isAdmin) {
-                            context.quick_action([{
-                                type: 'text',
-                                data: { text: `无权限，无法加载插件` }
-                            }]);
-                            return;
-                        }
-                        const url = (file as any).url; // 文件URL
-                        await download(url, `../plugins/${file.file}`);
-                        botlogger.info("下载完成:" + JSON.stringify(file));
-                        context.quick_action([{
-                            type: 'text',
-                            data: { text: `插件下载完成,开始重载` }
-                        }]);
-                        let isload = load
-                        isload.isuplad = true;
-                        isload.name = file.file
-                        if ((context.message_type === 'group')) {
-                            isload.id = context.group_id
-                        } else {
-                            isload.id = context.sender.user_id
-                        }
-                        isload.isGroupMessage = (context.message_type === 'group');
-                        saveConfig("load", isload)
-                    }
-                    return;
-                }
-
                 if (context.message[0].type !== 'text') {
                     return;
                 }
                 const msg = context.message[0].data.text || '';
-
-                if (msg.startsWith("//PLUGIN ")) {
-                    const endOfLine = msg.indexOf("\n");
-                    if (endOfLine !== -1) {
-                        const pluginName = msg.substring(9, endOfLine).trim();
-                        if (pluginName.endsWith(".ts")) {
-
-                            let isAdmin = PermissionConfig.admins.some((admin: string) => admin === String(context.sender.user_id));
-                            if (!isAdmin) {
-                                context.quick_action([{
-                                    type: 'text',
-                                    data: { text: `无权限，无法加载插件` }
-                                }]);
-                                return;
-                            }
-
-                            botlogger.info("开始安装插件: " + pluginName);
-                            const __dirname = path.dirname(fileURLToPath(import.meta.url));
-                            // @ts-ignore
-                            fs.writeFileSync(path.join(__dirname, "..", "plugins", pluginName), msg, "utf8");
-
-                            context.quick_action([{
-                                type: 'text',
-                                data: { text: `插件下载完成,开始重载` }
-                            }]);
-                            let isload = load
-                            isload.isuplad = true;
-                            isload.name = pluginName
-                            if ((context.message_type === 'group')) {
-                                isload.id = context.group_id
-                            } else {
-                                isload.id = context.sender.user_id
-                            }
-                            isload.isGroupMessage = (context.message_type === 'group');
-                            saveConfig("load", isload)
-                        }
-                    }
-                }
 
                 if (msg == CMD_PREFIX) {
                     context.quick_action([{

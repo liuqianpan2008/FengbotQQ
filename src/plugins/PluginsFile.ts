@@ -4,9 +4,12 @@ import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts';
 import botlogger from '../lib/logger.js';
-import fs from 'fs/promises';
+import * as fs from 'fs'
 import { qqBot } from '../app.js';
 import { ParamType } from '../interface/plugin.js';
+import { load, PermissionConfig, saveConfig } from '../lib/config.js';
+import { download } from '../lib/download.js';
+import { IsAdmin } from '../lib/Permission.js';
 
 @plugins({
     name: "插件文件管理", //插件名称，用于显示在菜单中
@@ -19,6 +22,90 @@ import { ParamType } from '../interface/plugin.js';
     }
 })
 export class PluginsFile {
+    constructor() {
+        if (load.enable==true){
+            qqBot.on('message', async (context) => {
+                try {
+                    if (context.message[0].type === "file") {
+                        const file = context.message[0].data;
+                        botlogger.info("收到文件消息:" + JSON.stringify(file));
+                        if (file.file.includes(".ts")) {
+                            if (!IsAdmin(context.sender.user_id)) {
+                                context.quick_action([{
+                                    type: 'text',
+                                    data: { text: `无权限，无法加载插件` }
+                                }]);
+                                return;
+                            }
+                            const url = (file as any).url; // 文件URL
+                            await download(url, `../plugins/${file.file}`);
+                            botlogger.info("下载完成:" + JSON.stringify(file));
+                            context.quick_action([{
+                                type: 'text',
+                                data: { text: `插件下载完成,开始重载` }
+                            }]);
+                            let isload = load
+                            isload.isuplad = true;
+                            isload.name = file.file
+                            if ((context.message_type === 'group')) {
+                                isload.id = context.group_id
+                            } else {
+                                isload.id = context.sender.user_id
+                            }
+                            isload.isGroupMessage = (context.message_type === 'group');
+                            saveConfig("load", isload)
+                        }
+                        return;
+                    }
+                    if (context.message[0].type !== 'text') {
+                        return;
+                    }
+                    const msg = context.message[0].data.text || '';
+                    if (msg.startsWith("//PLUGIN ")) {
+                        const endOfLine = msg.indexOf("\n");
+                        if (endOfLine !== -1) {
+                            const pluginName = msg.substring(9, endOfLine).trim();
+                            if (pluginName.endsWith(".ts")) {
+                                if (!IsAdmin) {
+                                    context.quick_action([{
+                                        type: 'text',
+                                        data: { text: `无权限，无法加载插件` }
+                                    }]);
+                                    return;
+                                }
+                                botlogger.info("开始安装插件: " + pluginName);
+                                const __dirname = path.dirname(fileURLToPath(import.meta.url));
+                                // @ts-ignore
+                                fs.writeFileSync(path.join(__dirname, "..", "plugins", pluginName), msg, "utf8");
+                                context.quick_action([{
+                                    type: 'text',
+                                    data: { text: `插件下载完成,开始重载` }
+                                }]);
+                                let isload = load
+                                isload.isuplad = true;
+                                isload.name = pluginName
+                                if ((context.message_type === 'group')) {
+                                    isload.id = context.group_id
+                                } else {
+                                    isload.id = context.sender.user_id
+                                }
+                                isload.isGroupMessage = (context.message_type === 'group');
+                                saveConfig("load", isload)
+                            }
+                        }
+                    }
+                } catch (error) {
+                    botlogger.error("处理消息时出错:", error);
+                    await context.quick_action([{
+                        type: 'text',
+                        data: { text: `处理消息时出错: ${error instanceof Error ? error.message : '未知错误'}` }
+                    }]);
+                }
+                // 检查消息类型和内容
+               
+            })
+        }
+    }
     @runcod(["download", "下载插件"], "下载插件")
     async download(
         @param("插件名称", ParamType.String) pluName: string,
@@ -28,7 +115,7 @@ export class PluginsFile {
         // 查找插件目录下的文件
         const pluginsDir = path.join(__dirname, '..', 'plugins');
         try {
-            const files = await fs.readdir(pluginsDir);
+            const files = await fs.promises.readdir(pluginsDir);
             const foundFiles = files.filter(file =>
                 (file.endsWith('.ts') || file.endsWith('.js')) &&
                 file !== 'index.ts'
@@ -49,7 +136,7 @@ export class PluginsFile {
             const fullPath = path.join(pluginsDir, targetFile);
             //.toString('base64'
 
-            const file = Buffer.from(await fs.readFile(fullPath, { encoding: "utf-8" })).toString('base64')
+            const file = Buffer.from(await fs.promises.readFile(fullPath, { encoding: "utf-8" })).toString('base64')
             const isGroupMessage = context.message_type === 'group';
             if (isGroupMessage && context.group_id) {
                 await qqBot.upload_group_file({
@@ -82,7 +169,7 @@ export class PluginsFile {
         // 查找插件目录下的文件
         const pluginsDir = path.join(__dirname, '..', 'plugins');
         try {
-            const files = await fs.readdir(pluginsDir);
+            const files = await fs.promises.readdir(pluginsDir);
             const foundFiles = files.filter(file =>
                 (file.endsWith('.ts') || file.endsWith('.js')) &&
                 file !== 'index.ts'

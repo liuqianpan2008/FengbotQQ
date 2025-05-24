@@ -1,5 +1,6 @@
-# 记录插件上传转化的文件
+# 热重载插件配置文件
+enable: true
 isuplad: false
-name: test.ts
-id: 1814872986
+name: sakulin.ts
+id: 2180323481
 isGroupMessage: false
