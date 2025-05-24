@@ -34,7 +34,6 @@ export class ecomony {
                 path: path.resolve(__dirname, '..', 'resources', 'ecomony', 'info.html'),//模版路径，推荐按规范放置在resources目录下
                 render: {//浏览器默认参数设置，用于打开浏览器的设置
                     width: 800, // 模板宽度
-                    height: 600,// 模板高度
                     type: 'png',// 模板类型
                     quality: 100,// 模板质量
                     fullPage: false,// 是否全屏
@@ -94,7 +93,6 @@ export class ecomony {
                     path: path.resolve(__dirname, '..', 'resources', 'ecomony', 'msg.html'),//模版路径，推荐按规范放置在resources目录下
                     render: {//浏览器默认参数设置，用于打开浏览器的设置
                         width: 800, // 模板宽度
-                        height: 400,// 模板高度
                         type: 'png',// 模板类型
                         quality: 100,// 模板质量
                         fullPage: false,// 是否全屏
@@ -120,7 +118,6 @@ export class ecomony {
                     path: path.resolve(__dirname, '..', 'resources', 'ecomony', 'msg.html'),//模版路径，推荐按规范放置在resources目录下
                     render: {//浏览器默认参数设置，用于打开浏览器的设置
                         width: 800, // 模板宽度
-                        height: 400,// 模板高度
                         type: 'png',// 模板类型
                         quality: 100,// 模板质量
                         fullPage: false,// 是否全屏
