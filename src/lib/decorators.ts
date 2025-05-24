@@ -6,12 +6,15 @@ const CMD_PREFIX = config?.cmd?.prefix ?? '#';
 import { fileURLToPath } from 'node:url';
 import { Command, CommandConfig, ParamMetadata, ParamType, PluginConfig } from '../interface/plugin.js';
 import { Plugin } from '../interface/plugin.js';
+import { EconomyCommands } from '../interface/economy.js';
 
 
 
 
 // 存储参数元数据
 export const paramMetadata = new Map<string, ParamMetadata[]>();
+// 存储金币相关的命令
+export const economyCommands= new Map<string, EconomyCommands>();
 // 存储命令的数组
 export const commandList: Plugin[] = [];
 
@@ -266,5 +269,26 @@ export function schedule(cron: string): MethodDecorator {
 
         // 返回修改后的描述符
         return descriptor;
+    };
+}
+
+// 添加金币相关的fn装饰器
+/**
+ * 金币相关的fn装饰器
+ * @param amount - 金币数量
+ * @param type - 操作类型: 'add' 或 'remove'
+ * @param reason - 操作原因
+ */
+export function coins(amount: number, type: 'add' | 'remove' ,reason: string = "未知原因") {
+    return function (target: any, propertyKey: string | symbol | undefined): void {
+        const actualPropertyKey = propertyKey!;
+        const fnName = `${target.constructor.name}.${actualPropertyKey.toString()}`;
+        const EconomyCommand: EconomyCommands = {
+            amount: amount,
+            type: type,
+            reason: reason,
+            name: ''
+        };
+        economyCommands.set(fnName,{...EconomyCommand})
     };
 }

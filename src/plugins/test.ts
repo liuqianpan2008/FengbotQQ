@@ -1,6 +1,6 @@
 //PLUGIN test.ts
 
-import { param, plugins, runcod, schedule } from '../lib/decorators.js';
+import { coins, param, plugins, runcod, schedule } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +36,10 @@ export class test {
         })
         botlogger.info("测试插件加载成功")
     }
-    @runcod(["param"], "参数实例")//命令装饰器，用于注册命令
+    @runcod(
+        ["param"], //命令名称，用于触发命令
+        "参数实例" //命令描述，用于显示在默认菜单中
+    )//命令装饰器，用于注册命令
     async param(
         @param("参数1", ParamType.String) param1: string,//参数装饰器，用于解析参数
         @param("参数2", ParamType.Number,999,true) param2: number,//参数装饰器，用于解析参数
@@ -68,6 +71,24 @@ export class test {
         };
     }
 
+    @runcod(["add"], "添加金币")//命令装饰器，用于注册命令
+    @coins(10000,//金币数量
+        'add',//类别 add为增加金币，remove为减少金币
+        "添加金币"//原因，用于记录日志
+    )
+    async add(){
+        return `添加成功`;
+    }
+    //remove coins from user
+    @runcod(["remove"], "移除金币")//命令装饰器，用于注册命令
+    @coins(
+        10000,//金币数量
+        'remove',//类别 add为增加金币，remove为减少金币
+        "移除金币"//原因，用于记录日志
+    ) //经济修饰词，用于减少金币
+    async remove(){
+        return `移除成功`;
+    }
     @schedule('* */30 * * * *') // 每30分钟执行一次
     async testschedule() {
         // botlogger.info("定时任务测试")

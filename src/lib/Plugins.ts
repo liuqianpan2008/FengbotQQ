@@ -13,13 +13,14 @@ import { Command, ParamMetadata, Plugin, } from '../interface/plugin.js';
 import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
-import { Botconfig as config, load, PermissionConfig, saveConfig } from './config.js'
+import { Botconfig as config, economy, load, PermissionConfig, saveConfig } from './config.js'
 import { ImageSegment, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
 import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { IsPermission } from "./Permission.js";
 import { download } from "./download.js";
-import { commandList, paramMetadata } from "./decorators.js";
+import { commandList, economyCommands, paramMetadata } from "./decorators.js";
+import { addCoins, removeCoins } from "./economy.js";
 
 //WSSendParam
 const CMD_PREFIX = config?.cmd?.prefix ?? '#';
@@ -436,7 +437,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
             command: command.cmd,
             args: parsedArgs.slice(0, -1) // 不显示 context 对象
         }));
-
+        await cost(context, command);
         // 执行命令
         const pluginInstance = new (command.class)();
         const result = await command.fn.apply(pluginInstance, parsedArgs);
@@ -649,6 +650,20 @@ export function runcod(cmd: string | string[], desc: string): MethodDecorator {
     };
 }
 
+// 指令花费金币
+export async function cost( context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage,command: Command){
+    if (economy.enable == false) {
+        return;
+    }
+    const ecocmd = economyCommands.get(command.pluginId + "." + command.fnName);
+    if (ecocmd) {
+      if (ecocmd.type ==='add') {
+        addCoins(context.sender.user_id.toString(), ecocmd.amount, ecocmd.reason);
+      }else{
+        removeCoins(context.sender.user_id.toString(), ecocmd.amount, ecocmd.reason);
+      }
+    }
+}
 
 // 修改参数解析函数
 async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage, command: Command,easycmd:boolean): Promise<any[]> {

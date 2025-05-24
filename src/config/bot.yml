@@ -1,3 +1,4 @@
+# bot 配置文件，用于配置 bot 的相关信息，如协议、主机地址、端口号、访问令牌等。
 bot:
   protocol: "ws"  # 协议 ws/wss
   host: "192.168.100.249"  # 主机地址
@@ -9,4 +10,4 @@ bot:
     attempts: 10
     delay: 5000
 cmd:
- prefix: "#"
+ prefix: "#" # 命令前缀
