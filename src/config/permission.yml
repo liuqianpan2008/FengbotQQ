@@ -59,6 +59,14 @@ users:
       sakulass:
         commands:
           图: true
+      ecomony:
+        commands:
+          info: true
+          add: true
+          help: true
+      test:
+        commands:
+          remove: true
   default:
     plugins:
       test:

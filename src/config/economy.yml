@@ -4,5 +4,5 @@ enable: true # 是否启用经济系统
 currency: 元 # 货币单位
 decimal: 2 # 小数位数
 data:
-  path: "/Users/fenglin/Desktop/botQQ/src/data" # 数据路径
+  path: "/Users/fenglin/Desktop/botQQ/data" # 数据路径
   defaultCoins: 0 # 默认金额

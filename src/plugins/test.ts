@@ -71,20 +71,10 @@ export class test {
         };
     }
 
-    @runcod(["add"], "添加金币")//命令装饰器，用于注册命令
-    @coins(10000,//金币数量
-        'add',//类别 add为增加金币，remove为减少金币
-        "添加金币"//原因，用于记录日志
-    )
-    async add(){
-        return `添加成功`;
-    }
-    //remove coins from user
     @runcod(["remove"], "移除金币")//命令装饰器，用于注册命令
     @coins(
-        10000,//金币数量
+        10,//金币数量
         'remove',//类别 add为增加金币，remove为减少金币
-        "移除金币"//原因，用于记录日志
     ) //经济修饰词，用于减少金币
     async remove(){
         return `移除成功`;

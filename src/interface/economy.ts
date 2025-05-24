@@ -7,7 +7,7 @@ export interface Economylogs {
     type: 'add' | 'remove';
     amount: number;
     reason: string;
-    date: Date;
+    date: string;
 }
 export interface EconomyCommands {
     name: string; 

@@ -279,14 +279,14 @@ export function schedule(cron: string): MethodDecorator {
  * @param type - 操作类型: 'add' 或 'remove'
  * @param reason - 操作原因
  */
-export function coins(amount: number, type: 'add' | 'remove' ,reason: string = "未知原因") {
+export function coins(amount: number, type: 'add' | 'remove' ,reason?: string) {
     return function (target: any, propertyKey: string | symbol | undefined): void {
         const actualPropertyKey = propertyKey!;
         const fnName = `${target.constructor.name}.${actualPropertyKey.toString()}`;
         const EconomyCommand: EconomyCommands = {
             amount: amount,
             type: type,
-            reason: reason,
+            reason: reason??`执行指令: ${CMD_PREFIX}${fnName} ${type=='add'? '增加':'减少'} ${amount}`,
             name: ''
         };
         economyCommands.set(fnName,{...EconomyCommand})
