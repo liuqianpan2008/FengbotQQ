@@ -59,6 +59,8 @@ users:
       sakulass:
         commands:
           图: true
+          一言: true
+          help: true
       ecomony:
         commands:
           info: true
@@ -67,6 +69,19 @@ users:
       test:
         commands:
           remove: true
+          help: true
+          param: true
+      Botlog:
+        commands:
+          logs: true
+          downloadlog: true
+      Prop:
+        commands:
+          list: true
+          help: true
+          buy: true
+          use: true
+          my: true
   default:
     plugins:
       test:

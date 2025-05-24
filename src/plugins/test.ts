@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { qqBot } from '../app.js';
 import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
+import { prop } from '../lib/prop.js';
 
 @plugins({
     easycmd: true,//是否启用简易命令，启用将将命令注册为<命令名称>，不启用将注册为#<插件名称> <命令名称>
@@ -82,6 +83,20 @@ export class test {
     @schedule('* */30 * * * *') // 每30分钟执行一次
     async testschedule() {
         // botlogger.info("定时任务测试")
+    }
+    @prop(
+        "testProp",//道具id
+        "测试道具",//道具名称
+        1,//道具最大使用数量
+        "测试使用道具",//道具描述
+        "",//道具图片
+        1//道具价格
+    )
+    async test(
+        userId:string,
+        propparam:string
+    ): Promise<any>{
+        return `成功对用户${userId}使用测试道具--接受道具参数${propparam}`
     }
 
 }

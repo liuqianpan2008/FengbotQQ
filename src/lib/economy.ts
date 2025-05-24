@@ -39,7 +39,8 @@ export function getUserData(userId: string): UserData {
             economy: {
                 coins: 0,
                 logs: []
-            }
+            },
+            props: []
         }
     }
     if (!fs.existsSync(`${economy.data.path}/${userId}.json`)) {
@@ -47,8 +48,10 @@ export function getUserData(userId: string): UserData {
             userId: userId,
             economy: {
                 coins: economy.data.defaultCoins,
-                logs: []
-            }
+                logs: [],
+                
+            },
+            props: []
         };
         fs.writeFileSync(`${economy.data.path}/${userId}.json`, JSON.stringify(newUserData, null, 4));
         return newUserData;
@@ -56,7 +59,7 @@ export function getUserData(userId: string): UserData {
     const userData = JSON.parse(fs.readFileSync(`${economy.data.path}/${userId}.json`, 'utf-8')) as UserData;
     return userData;
 }
-function  saveUserData(userId: string, userData: UserData): void {
+export function  saveUserData(userId: string, userData: UserData): void {
     if (!fs.existsSync(`${economy.data.path}`)) {
         throw new Error(`未找到用户数据目录，请检查配置文件`);
     }

@@ -1,9 +1,12 @@
+import { Prop } from "./prop.js";
+
 export interface UserData {
     userId: string; 
     economy:{
         coins: number;
         logs: Economylogs[];
-    }
+    },
+    props:Prop[]
 }
 export interface Economylogs {
     type: 'add' | 'remove';
