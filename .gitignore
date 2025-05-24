@@ -82,5 +82,7 @@ src/plugins/*
 !src/plugins/test.ts
 !src/plugins/log.ts
 !src/plugins/ecomony.ts
+!src/plugins/prop.ts
+
 
 /data
