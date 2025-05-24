@@ -1,7 +1,9 @@
 export interface UserData {
     userId: string; 
-    coins: number;
-    logs: Economylogs[];
+    economy:{
+        coins: number;
+        logs: Economylogs[];
+    }
 }
 export interface Economylogs {
     type: 'add' | 'remove';

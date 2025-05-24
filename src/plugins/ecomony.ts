@@ -21,13 +21,13 @@ export class ecomony {
     async ecomonyInfo(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
-        const { userId,coins,logs } = await getUserData(context?.sender?.user_id?.toString())
+        const { economy } = await getUserData(context?.sender?.user_id?.toString())
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
         return {
             nickname: context?.sender?.nickname??"未知",
-            coins: coins,
-            logs: logs,
-            avatar: `http://q1.qlogo.cn/g?b=qq&nk=${userId}&s=640`,
+            coins: economy.coins,
+            logs: economy.logs,
+            avatar: `http://q1.qlogo.cn/g?b=qq&nk=${context?.sender?.user_id??0}&s=640`,
             template: {
                 enabled: true,
                 sendText: false,
@@ -43,11 +43,11 @@ export class ecomony {
             },
             toString() { //重写toString方法，用于返回文本内容，启用sendText时将发送文本内容，不启用时将发送图片内容，图片发送失败时发送文字内容
                 let logsString = "";
-                logs.forEach(log => {
+                economy.logs.forEach(log => {
                     logsString += `类型: ${log.type} 数量: ${log.amount} 原因: ${log.reason} 时间: ${log.date}\n`;
                 });
                 return `
-                    金币: ${coins}\n
+                    金币: ${economy.coins}\n
                     ------明细记录----
                     ${logsString}
                 `;
@@ -84,7 +84,7 @@ export class ecomony {
                 }
             }
             addCoins(context.sender.user_id.toString(),amount,reason)
-            const newcoins = (await getUserData(userid)).coins
+            const newcoins = (await getUserData(userid)).economy.coins
             return {
                 msgtype: 'success',
                 ecomsg: `增加成功! 金币 +${amount}, 当前数量: ${newcoins}`,
@@ -169,7 +169,7 @@ export class ecomony {
                 }
             }
             removeCoins(context.sender.user_id.toString(),-amount,reason)
-            const newcoins = (await getUserData(userid)).coins
+            const newcoins = (await getUserData(userid)).economy.coins
             return {
                 msgtype:'success',
                 ecomsg: `减少成功! 金币 -${amount}, 当前数量: ${newcoins}`,

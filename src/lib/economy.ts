@@ -6,8 +6,8 @@ import { economy } from "./config.js";
 
 export function addCoins(userId: string, amount: number, reason: string): void {
     const userData = getUserData(userId);
-    userData.coins += amount;
-    userData.logs.unshift({
+    userData.economy.coins += amount;
+    userData.economy.logs.unshift({
         type: 'add',
         amount: amount,
         reason: reason,
@@ -17,11 +17,11 @@ export function addCoins(userId: string, amount: number, reason: string): void {
 }
 export function removeCoins(userId: string, amount: number, reason: string): void {
     const userData = getUserData(userId);
-    if (userData.coins < amount) {
-        throw new Error(`${economy.name}不足，需要${amount}${economy.currency},拥有${userData.coins}${economy.currency}`);
+    if (userData.economy.coins < amount) {
+        throw new Error(`${economy.name}不足，需要${amount}${economy.currency},拥有${userData.economy.coins}${economy.currency}`);
     }
-    userData.coins -= amount;
-    userData.logs.unshift({
+    userData.economy.coins -= amount;
+    userData.economy.logs.unshift({
         type: 'remove',
         amount: amount,
         reason: reason,
@@ -36,15 +36,19 @@ export function getUserData(userId: string): UserData {
     if (!userId) {
         return {
             userId: '',
-            coins: 0,
-            logs: []
+            economy: {
+                coins: 0,
+                logs: []
+            }
         }
     }
     if (!fs.existsSync(`${economy.data.path}/${userId}.json`)) {
         const newUserData: UserData = {
             userId: userId,
-            coins: economy.data.defaultCoins,
-            logs: []
+            economy: {
+                coins: economy.data.defaultCoins,
+                logs: []
+            }
         };
         fs.writeFileSync(`${economy.data.path}/${userId}.json`, JSON.stringify(newUserData, null, 4));
         return newUserData;
