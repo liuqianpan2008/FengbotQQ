@@ -110,7 +110,6 @@ export class test {
         propparam: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any>{
-        debugger;
         if (context?.message_type === 'group') {
             await qqBot.set_group_special_title({
                 group_id:Number(context.group_id),
