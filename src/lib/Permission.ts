@@ -1,4 +1,4 @@
-import { PermissionConfig, saveConfig } from "./config.js";
+import { PermissionConfig, saveConfig, savePermission } from "./config.js";
 import botlogger from "./logger.js";
 export const IsAdmin = async function (id:number){return await PermissionConfig.admins.some((admin: string) => admin === String(id)) }
 export async function IsPermission(id: number, plugin: string, command: string): Promise<boolean> {
@@ -65,7 +65,7 @@ async function saveNewCommandConfig(id: number, plugin: string, command: string)
         // 设置新命令默认权限
         PermissionConfig.users[id].plugins[plugin].commands[command] = true;
         
-        saveConfig('permission', PermissionConfig);
+        savePermission('permission', PermissionConfig);
         botlogger.info(`自动创建 [${id}] 的 ${plugin}.${command} 命令权限`);
     } catch (error) {
         botlogger.error(`配置保存失败：${error instanceof Error ? error.stack : error}`);

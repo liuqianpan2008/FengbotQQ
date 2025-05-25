@@ -1,5 +1,6 @@
 //PLUGIN test.ts
 
+  
 import { coins, param, plugins, runcod, schedule } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
@@ -8,7 +9,17 @@ import { qqBot } from '../app.js';
 import botlogger from '../lib/logger.js';
 import { ParamType } from '../interface/plugin.js';
 import { prop } from '../lib/prop.js';
-
+import * as fs from 'fs'
+import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
+async function convertImageToBase64(filePath: string): Promise<string> {
+    try {
+      const fileData = await fs.promises.readFile(filePath);
+      return `data:image/jpeg;base64,${fileData.toString('base64')}`;
+    } catch (error) {
+      console.error('图片转换失败:', error);
+      return '';
+    }
+  }
 @plugins({
     easycmd: true,//是否启用简易命令，启用将将命令注册为<命令名称>，不启用将注册为#<插件名称> <命令名称>
     name: "测试插件", //插件名称，用于显示在菜单中
@@ -86,17 +97,26 @@ export class test {
     }
     @prop(
         "testProp",//道具id
-        "测试道具",//道具名称
+        "称号卡",//道具名称
         1,//道具最大使用数量
-        "测试使用道具",//道具描述
-        "",//道具图片
+        "实例道具，使用后可以给指定群友设置称号，需要管理权限",//道具描述
+        await convertImageToBase64("/Users/fenglin/Desktop/botQQ/src/resources/test/Prop/test.jpg"),//道具图片
         1//道具价格
     )
     async test(
         userId:string,
-        propparam:string
+        propparam:string,
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any>{
-        return `成功对用户${userId}使用测试道具--接受道具参数${propparam}`
+        debugger
+        if (context?.message_type === 'group') {
+            await qqBot.set_group_special_title({
+                group_id:Number(context.group_id),
+                user_id:Number(userId),
+                special_title:propparam
+            })
+        }
+        return `操作成功！`
     }
 
 }

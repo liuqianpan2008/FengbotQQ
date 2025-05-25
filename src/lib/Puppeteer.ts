@@ -10,7 +10,11 @@ export class HtmlImg {
         if (!this.browser) {
             const options: PuppeteerLaunchOptions = {
                 headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--allow-file-access-from-files' // 新增参数
+                ]
             };
             this.browser = await puppeteer.launch(options);
         }

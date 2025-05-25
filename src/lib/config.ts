@@ -13,7 +13,15 @@ export function saveConfig(file: string, data: any): void {
     const configPath = path.join(__dirname, `../config/${file}.yml`);  // 保持源码与编译后一致
     fs.writeFileSync(configPath, yaml.dump(data));
 }
+export async function loadPermission(){
+    const configPath = path.join(__dirname, `../../data/permission.yml`);  // 保持源码与编译后一致
+    return await yaml.load(fs.readFileSync(configPath, 'utf8')) as any;
+}
+export function savePermission(file: string, data: any): void {
+    const configPath = path.join(__dirname, `../../data/permission.yml`);  // 保持源码与编译后一致
+    fs.writeFileSync(configPath, yaml.dump(data));
+}
 export const Botconfig = await loadConfig('bot');
-export const PermissionConfig = await loadConfig('permission');
+export const PermissionConfig = await loadPermission();
 export const load = await loadConfig('load')
 export const economy = await loadConfig('economy')

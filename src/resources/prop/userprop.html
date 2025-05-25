@@ -1,0 +1,79 @@
+<h3>{{nickname}}道具仓库</h3>
+<div class="prop-grid">
+    {{each Prs}}
+    <div class="prop-card">
+      <img src="{{$value.img}}" class="prop-image" alt="道具图片">
+      <div class="prop-body">
+        <h3 class="prop-name">🤩{{$value.propName}}[{{$value.propId}}]🤩</h3>
+        <p class="prop-describe">📖{{$value.describe}}</p>
+        <div class="prop-price">
+          库存：{{$value.Num}} 个
+        </div>
+      </div>
+    </div>
+    {{/each}}
+</div>
+
+<style>
+.prop-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 15px;
+}
+
+.prop-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 220px;
+  transition: transform 0.2s;
+}
+
+.prop-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px 12px 0 0;
+}
+
+.prop-body {
+  padding: 15px;
+  text-align: center;
+}
+
+.prop-name {
+  margin: 12px 0;
+  color: #2d2d2d;
+  font-size: 18px;
+}
+
+.prop-describe {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 60px;
+}
+
+.prop-price span {
+  justify-content: flex-end;
+  background: transparent;
+  color: #ff5722;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin: 10px 0;
+  gap: 8px;
+}
+
+coin-icon {
+  width: 20px;
+  height: 20px;
+  order: 1; /* 图标放在价格右侧 */
+}
+
+.prop-card:hover .prop-price {
+  transform: scale(1.03);
+  background: rgba(255, 87, 34, 0.05);
+}
+</style>
