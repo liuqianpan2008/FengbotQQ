@@ -4,9 +4,10 @@ import botlogger from './logger.js';
 import { Botconfig as config } from './config.js'
 const CMD_PREFIX = config?.cmd?.prefix ?? '#';
 import { fileURLToPath } from 'node:url';
-import { Command, CommandConfig, ParamMetadata, ParamType, PluginConfig } from '../interface/plugin.js';
+import { Command, CommandConfig, ParamMetadata, PluginConfig } from '../interface/plugin.js';
 import { Plugin } from '../interface/plugin.js';
 import { EconomyCommands } from '../interface/economy.js';
+import { Receive } from 'node-napcat-ts/dist/Structs.js';
 
 
 
@@ -20,7 +21,7 @@ export const commandList: Plugin[] = [];
 
 // 修改参数装饰器
 //默认值
-export function param(name: string, type: ParamType = ParamType.String, defaultValue?:any, optional: boolean = false): ParameterDecorator {
+export function param(name: string, type: "text" | "image" | "reply" | "poke" | "at" | "file" | "dice" | "rps" | "face" | "video" | "record" | "forward" | "json" | "markdown", defaultValue?:Receive[keyof Receive], optional: boolean = false): ParameterDecorator {
 
     return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number): void {
         const actualPropertyKey = propertyKey!;

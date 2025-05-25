@@ -2,11 +2,10 @@ import { param, plugins, runcod } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
-import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts';
+import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage, Receive } from 'node-napcat-ts';
 import botlogger from '../lib/logger.js';
 import fs from 'fs/promises';
 import { qqBot } from '../app.js';
-import { ParamType } from '../interface/plugin.js';
 @plugins({
     name: "log日志管理", //插件名称，用于显示在菜单中
     version: "1.0.0", //插件版本号，用于显示在菜单中
@@ -34,15 +33,15 @@ export class Botlog {
                 foundFiles[index] = path.parse(file).name;
             })
             return `找到插件文件：${foundFiles.join(', ')}`;
-        } catch (error) {
-            botlogger.error('文件查找失败：', error);
+        } catch (error:any) {
+            botlogger.error('文件查找失败：' + error.message);
             return '插件查找服务暂不可用';
         }
     }
 
     @runcod(["downloadlog", "getlog"], "下载日志")
     async getBotlogbyfile(
-        @param("日志名称", ParamType.String) logName: string,
+        @param("日志名称", 'text') logName: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
         // pluName += ".ts"
@@ -57,7 +56,7 @@ export class Botlog {
 
             // 根据文件名查找具体插件
             const targetFile = foundFiles.find((file: string) =>
-                path.parse(file).name.toLowerCase() === logName.toLowerCase()
+                path.parse(file).name.toLowerCase() === logName.data.text.toLowerCase()
             );
 
             if (!targetFile) {
@@ -86,8 +85,8 @@ export class Botlog {
             }
 
             return '上传成功';
-        } catch (error) {
-            botlogger.error('文件查找失败：', error);
+        } catch (error:any) {
+            botlogger.error('文件查找失败：' + error.message);
             return '插件查找服务暂不可用';
         }
     }

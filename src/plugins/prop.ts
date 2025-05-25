@@ -1,5 +1,4 @@
 import botlogger from "../lib/logger.js";
-import { ParamType } from "../interface/plugin.js";
 import { param, plugins, runcod } from "../lib/decorators.js";
 import { addProp, getuserProp, Props, reduceProp } from "../lib/prop.js";
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from "node-napcat-ts";
@@ -7,6 +6,7 @@ import { removeCoins } from "../lib/economy.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Prop } from "../interface/prop.js";
+import { Receive } from 'node-napcat-ts/dist/Structs.js';
 
 @plugins({
     easycmd: true,//是否启用简易命令，启用将将命令注册为<命令名称>，不启用将注册为#<插件名称> <命令名称>
@@ -22,41 +22,42 @@ import { Prop } from "../interface/prop.js";
 export class Propplu {
     @runcod(["use", "使用道具"],"使用道具" )
     async useprop(
-        @param("道具Id", ParamType.String) propId: string,
-        @param("QQ", ParamType.Number) userId: string,
-        @param("数量", ParamType.Number, 1, true) Num: number,
-        @param("道具参数",ParamType.String,"",true) propparam:string,
+        @param("道具Id","text") propId: Receive["text"],
+        @param("QQ", "at") userId: Receive["at"],
+        @param("数量", "text", {type:'text',data:{text:"1"}}, true) Num: Receive["text"],
+        @param("道具参数","text",{type:'text',data:{text:""}},true) propparam:Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
         const userProp = await getuserProp(context?.sender?.user_id.toString()??"0") || [];
-        let findprop = userProp.find((prop) => prop.propId == propId);
+        let findprop = userProp.find((prop) => prop.propId == propId?.data?.text);
         if (!findprop) {
             return this.tl(`你没有${propId}道具`,'error',`你没有${propId}道具`)
         }
-        if (findprop.Num < Num) {
+        
+        if (findprop.Num < Number(Num?.data?.text)) {
             return this.tl(`道具数量不足`,'error',`道具数量不足`)
         }
         Props.forEach((prop) => {
-            if (prop.propId === propId) {
-                if(prop.maxuse<Num){
+            if (prop.propId === propId?.data?.text) {
+                if(prop.maxuse<Number(Num?.data?.text)){
                     return this.tl(`该道具允许最大使用数量为${prop.maxuse}超过最大使用数量`,'error',`该道具允许最大使用数量为${prop.maxuse}超过最大使用数量`)
                 }
             }    
         });
         try {
-            for (let i = 0; i < Num; i++) {
+            for (let i = 0; i < Number(Num?.data?.text); i++) {
                 let fn;
                 let classConstructor;
                 let propid=''
                 Props.forEach((prop) => {
-                    if (prop.propId==propId) {
+                    if (prop.propId==propId?.data?.text) {
                         fn = prop.fn;
                         classConstructor = prop.classConstructor
                         propid= prop.propId
                     }
                 })
                 if (await reduceProp(context?.sender?.user_id.toString()??"0", propid, 1)){
-                    const result = (fn as any).call(classConstructor, userId, propparam,context);
+                    const result = (fn as any).call(classConstructor, userId.data.qq, propparam,context);
                     if (result) {
                         return result;
                     }
@@ -138,19 +139,19 @@ export class Propplu {
     }
     @runcod(["buy","买"],"购买道具")
     async buyprop(
-        @param("道具Id", ParamType.String) propId: string,
-        @param("数量", ParamType.Number, 1, true) Num: number,
+        @param("道具Id", 'text') propId:  Receive["text"],
+        @param("数量", 'text', {type:'text',data:{text:"1"}}, true) Num:  Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ){
-        if(Num<=0){
+        if(Number(Num?.data?.text)<=0){
             return this.tl('道具数量不能小于0','error','道具数量不能小于0')
         }
         let res = ''
         Props.forEach(async (prop) => {
-            if(prop.propId===propId){
-                removeCoins(context?.sender?.user_id?.toString(),prop?.price??0 * Num,`购买道具${prop?.propName??'未知'}`)
-                addProp(context?.sender?.user_id?.toString(),prop?.propId,Num)
-                res = `购买${prop.propName}成功！消费${prop.price * Num}!`
+            if(prop.propId===propId?.data?.text){
+                removeCoins(context?.sender?.user_id?.toString(),prop?.price??0 * Number(Num?.data?.text),`购买道具${prop?.propName??'未知'}`)
+                addProp(context?.sender?.user_id?.toString(),prop?.propId,Number(Num?.data?.text))
+                res = `购买${prop.propName}成功！消费${prop.price * Number(Num?.data?.text)}!`
             }
         })
         return this.tl(res,'success',res)

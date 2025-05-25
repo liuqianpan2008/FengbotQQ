@@ -7,10 +7,10 @@ import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
 import { qqBot } from '../app.js';
 import botlogger from '../lib/logger.js';
-import { ParamType } from '../interface/plugin.js';
 import { prop } from '../lib/prop.js';
 import * as fs from 'fs'
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
+import { Receive } from 'node-napcat-ts';
 async function convertImageToBase64(filePath: string): Promise<string> {
     try {
       const fileData = await fs.promises.readFile(filePath);
@@ -53,8 +53,9 @@ export class test {
         "参数实例" //命令描述，用于显示在默认菜单中
     )//命令装饰器，用于注册命令
     async param(
-        @param("参数1", ParamType.String) param1: string,//参数装饰器，用于解析参数
-        @param("参数2", ParamType.Number,999,true) param2: number,//参数装饰器，用于解析参数
+        @param("参数1", 'text') param1: Receive["text"],//参数装饰器，用于解析参数
+        @param("参数2", 'text',{type: 'text',data: {text: '未输入数字'}},true) param2: Receive["text"],//参数装饰器，用于解析参数
+        @param("参数3", 'at') param3: Receive["at"],//参数装饰器，用于解析参数
     ): Promise<any> {
         if (!param1 || !param2) {
             return "请输入正确的参数格式: #test param <字符串> <数字>";//返回错误信息，用于显示在菜单中
@@ -64,6 +65,7 @@ export class test {
         return {
             param1,//参数1，用于显示在菜单中
             param2,//参数2，用于显示在菜单中
+            param3,//参数3，用于显示在菜单中
             template: { // 模板配置，用于发送图片内容
                 enabled: true,//是否启用模板，启用将发送图片内容
                 sendText: false,//是否发送文本，启用将发送文本内容，如果都启用则发送两条消息
@@ -105,15 +107,15 @@ export class test {
     )
     async test(
         userId:string,
-        propparam:string,
+        propparam: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any>{
-        debugger
+        debugger;
         if (context?.message_type === 'group') {
             await qqBot.set_group_special_title({
                 group_id:Number(context.group_id),
                 user_id:Number(userId),
-                special_title:propparam
+                special_title:propparam.data.text,
             })
         }
         return `操作成功！`

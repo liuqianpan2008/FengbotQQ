@@ -2,12 +2,11 @@ import { param, plugins, runcod } from '../lib/decorators.js';
 import path from 'path';
 import 'reflect-metadata';
 import { fileURLToPath } from 'node:url';
-import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts';
+import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage, Receive } from 'node-napcat-ts';
 import botlogger from '../lib/logger.js';
 import * as fs from 'fs'
 import { qqBot } from '../app.js';
-import { ParamType } from '../interface/plugin.js';
-import { load, PermissionConfig, saveConfig } from '../lib/config.js';
+import { load, saveConfig } from '../lib/config.js';
 import { download } from '../lib/download.js';
 import { IsAdmin } from '../lib/Permission.js';
 
@@ -108,7 +107,7 @@ export class PluginsFile {
     }
     @runcod(["download", "下载插件"], "下载插件")
     async download(
-        @param("插件名称", ParamType.String) pluName: string,
+        @param("插件名称", 'text') pluName: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -125,7 +124,7 @@ export class PluginsFile {
 
             // 根据文件名查找具体插件
             const targetFile = foundFiles.find((file: string) =>
-                path.parse(file).name.toLowerCase() === pluName.toLowerCase()
+                path.parse(file).name.toLowerCase() === pluName.data.text.toLowerCase()
             );
 
             if (!targetFile) {

@@ -1,3 +1,5 @@
+import { Receive } from "node-napcat-ts";
+
 // 更新 Plugin 接口
 export interface Plugin {
     id: string;
@@ -44,21 +46,11 @@ export interface Command {
 // 参数元数据接口
 export interface ParamMetadata {
     name: string; // 参数名称
-    type: ParamType; // 参数类型
+    type: "text" | "image" | "reply" | "poke" | "at" | "file" | "dice" | "rps" | "face" | "video" | "record" | "forward" | "json" | "markdown"; // 参数类型
     index: number; // 参数索引
-    defaultValue?: any; // 默认值
+    defaultValue?: Receive[keyof Receive]; // 默认值
     optional: boolean; // 是否可选
 }
-// 参数类型枚举
-export const ParamType = {
-    String: "string" as const,
-    Number: "number" as const,
-    Boolean: "boolean" as const,
-    Rest: "rest" as const
-} as const;
-// 从对象值中获取类型
-export type ParamType = typeof ParamType[keyof typeof ParamType];
-
 // 添加模板配置接口
 export interface TemplateConfig {
     enabled: boolean;

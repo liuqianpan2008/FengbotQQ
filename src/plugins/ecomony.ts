@@ -3,8 +3,8 @@ import { param, plugins, runcod } from "../lib/decorators.js";
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from "node-napcat-ts/dist/Interfaces.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import { ParamType } from "../interface/plugin.js";
 import { IsAdmin } from "../lib/Permission.js";
+import { Receive } from "node-napcat-ts";
 
 @plugins({
     name: "经济系统", //插件名称，用于显示在菜单中
@@ -56,9 +56,9 @@ export class ecomony {
 
     @runcod(["add", "增加"], "增加金币")
     async addecomony(
-        @param("QQ号", ParamType.Number,) userid: string,
-        @param("数量", ParamType.Number) amount: number,
-        @param("原因", ParamType.String,'管理员增加',true) reason: string,
+        @param("QQ号", 'at',) userid: Receive["at"],
+        @param("数量", 'text') amount: Receive["text"],
+        @param("原因", 'text',{type:'text',data:{text:"管理员增加"}},true) reason: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
@@ -82,8 +82,8 @@ export class ecomony {
                     }
                 }
             }
-            addCoins(context.sender.user_id.toString(),amount,reason)
-            const newcoins = (await getUserData(userid)).economy.coins
+            addCoins(context.sender.user_id.toString(),Number(amount.data.text),reason.data.text)
+            const newcoins = (await getUserData(userid.data.qq)).economy.coins
             return {
                 msgtype: 'success',
                 ecomsg: `增加成功! 金币 +${amount}, 当前数量: ${newcoins}`,
@@ -139,9 +139,9 @@ export class ecomony {
 
     @runcod(["reduce", "减少"], "减少金币")
     async reduceecomony(
-        @param("QQ号", ParamType.Number,) userid: string,
-        @param("数量", ParamType.Number) amount: number,
-        @param("原因", ParamType.String,'管理员减少',true) reason: string,
+        @param("QQ号", 'at',) userid: Receive["at"],
+        @param("数量", 'text') amount: Receive["text"],
+        @param("原因", 'text',{type:'text',data:{text:"管理员增加"}},true) reason: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ){
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
@@ -165,8 +165,8 @@ export class ecomony {
                     }
                 }
             }
-            removeCoins(context.sender.user_id.toString(),-amount,reason)
-            const newcoins = (await getUserData(userid)).economy.coins
+            removeCoins(context.sender.user_id.toString(),-amount,reason.data.text)
+            const newcoins = (await getUserData(userid.data.qq)).economy.coins
             return {
                 msgtype:'success',
                 ecomsg: `减少成功! 金币 -${amount}, 当前数量: ${newcoins}`,

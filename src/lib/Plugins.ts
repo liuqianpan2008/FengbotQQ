@@ -14,7 +14,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
 import { Botconfig as config, economy, load, PermissionConfig, saveConfig } from './config.js'
-import { ImageSegment, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
+import { ImageSegment, Receive, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
 import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { IsPermission } from "./Permission.js";
@@ -596,17 +596,49 @@ export async function cost( context: PrivateFriendMessage | PrivateGroupMessage 
 // 修改参数解析函数
 async function parseCommandParams(message: string, context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage, command: Command,easycmd:boolean): Promise<any[]> {
     const cmdArgs = message.split(/\s+/).filter(Boolean);
-
     // 移除命令前缀和命令名
     const parts = message.split(/\s+/);
     let cmdIndex = 2;
     if (easycmd) {
         cmdIndex = 1;
     }
-    const paramArgs = parts.slice(cmdIndex); 
+    const paramArgs: Receive[keyof Receive][] = [];
+    parts.slice(cmdIndex).forEach((part) => {
+        if (part !== '') {
+            const Args: Receive["text"] ={
+                type: 'text',
+                data: {
+                    text: part
+                }
+            }
+            paramArgs.push(Args)
+        }
+    }); 
+    // 插入其他类别的消息
+    for(let i = 0;i<context.message.length;i++){
+        if(i !== 0){
+            const msg= context.message[i]
+            if (msg.type === 'text') {
+                const parts = msg.data.text.split(/\s+/);
+                parts.forEach((part) => {
+                    if (part!== '') {
+                        const Args: Receive["text"] ={
+                            type: 'text',
+                            data: {
+                                text: part
+                            }
+                        }
+                        paramArgs.push(Args)
+                    }
+                });
+            }else{
+                paramArgs.push(context.message[i])
+            }
+            
+        }
+    }
 
-    // 调试日志
-    botlogger.info('DEBUG - 命令参数:' + JSON.stringify({ paramArgs }));
+    botlogger.info('DEBUG - 命令参数:' + JSON.stringify(paramArgs));
 
     const params: any[] = [];
     const param = paramMetadata.get(command.pluginId + "." + command.fnName);
@@ -627,28 +659,14 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
             if (!optional && !paramArgs[index]) {
                 throw new Error(`参数 <${name}> 是必需的,${msg}`);
             }
-            switch (type) {
-                case "string":
-                    params[index] = paramArgs[index] || '';
-                    break;
-                case "number":
-                    params[index] = Number(paramArgs[index]) || 0;
-                    if (isNaN(params[index])) {
-                        throw new Error(`参数 ${name} 必须是数字,${msg}`);
-                    }
-                    break;
-                case "boolean":
-                    params[index] = paramArgs[index] === 'true';
-                    if (optional && paramArgs[index] === undefined) {
-                        params[index] = false;
-                    }
-                    break;
-                case "rest":
-                    params[index] = paramArgs.slice(index);
-                    break;
-                default:
-                    throw new Error(`未知参数类型: ${type},${msg}`);
+            // 检查参数类型
+            let msgtype = paramArgs[index].type
+            if (type === msgtype) {
+                params[index] = paramArgs[index];
+            }else{
+                throw new Error(`参数 <${name}> 类型错误,${msg}`);
             }
+
             if (optional && paramArgs[index] === undefined) {
                 params[index] = paramData.defaultValue;
             }
