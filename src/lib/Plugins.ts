@@ -21,6 +21,7 @@ import { IsPermission } from "./Permission.js";
 import { download } from "./download.js";
 import { commandList, economyCommands, paramMetadata } from "./decorators.js";
 import { addCoins, removeCoins } from "./economy.js";
+import { url } from "node:inspector";
 
 //WSSendParam
 const CMD_PREFIX = config?.cmd?.prefix ?? '#';
@@ -256,7 +257,7 @@ export async function runplugins() {
                     }
                     //指令权限检查
                     if (context.message_type === 'private') {
-                        if (!await IsPermission(context.user_id, easyplugin.id, command.cmd)) {
+                        if (!await IsPermission(context.user_id, easyplugin.id, command.fnName, false)) {
                             botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${easyplugin.id} ${command.cmd}`);
                             context.quick_action([{
                                 type: 'text',
@@ -266,7 +267,7 @@ export async function runplugins() {
                         }
                     }
                     if (context.message_type === 'group') {
-                        if (!await IsPermission(context.group_id, easyplugin.id, command.cmd)) {
+                        if (!await IsPermission(context.sender.user_id, easyplugin.id, command.fnName,true)) {
                             botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${easyplugin.id} ${command.cmd}`);
                             context.quick_action([{
                                 type: 'text',
@@ -306,7 +307,7 @@ export async function runplugins() {
                 botlogger.info(`找到命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                 //指令权限检查
                 if (context.message_type === 'private') {
-                    if (!await IsPermission(context.user_id, plugin.id, command.cmd)) {
+                    if (!await IsPermission(context.user_id, plugin.id, command.fnName,false)) {
                         botlogger.info(`[${context.user_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
@@ -316,7 +317,7 @@ export async function runplugins() {
                     }
                 }
                 if (context.message_type === 'group') {
-                    if (!await IsPermission(context.group_id, plugin.id, command.cmd)) {
+                    if (!await IsPermission(context.sender.user_id, plugin.id, command.fnName, true)) {
                         botlogger.info(`[${context.group_id}]无权限执行命令: ${CMD_PREFIX}${plugin.id} ${command.cmd}`);
                         context.quick_action([{
                             type: 'text',
@@ -382,9 +383,13 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                 let templateIsPath: boolean = true;
                 const templateHtml = result.template.html;
                 const templatePath = result.template.path;
+                const url= result.template.render.url;
+                
                 if (templateHtml) {
                     templateIsPath = false;
-                } else if (!templatePath || !fs.existsSync(templatePath)) {
+                } else if (url) {
+                    templateIsPath = false;
+                }else if (!templatePath || !fs.existsSync(templatePath)) {
                     throw new Error(`Template not found: ${templatePath}`);
                 }
 
@@ -395,6 +400,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                         template: templateIsPath ? templatePath : templateHtml,
                         templateIsPath,
                         data: result,
+                        url: url,
                         width: result.template.render?.width || 800,
                         height: result.template.render?.height || 600,
                         type: result.template.render?.type || 'png',
@@ -660,16 +666,18 @@ async function parseCommandParams(message: string, context: PrivateFriendMessage
                 throw new Error(`参数 <${name}> 是必需的,${msg}`);
             }
             // 检查参数类型
-            let msgtype = paramArgs[index].type
+            if (optional && paramArgs[index] === undefined) {
+                params[index] = paramData.defaultValue;
+            }
+            
+            let msgtype = paramArgs[index]?.type ?? paramData.defaultValue?.type
             if (type === msgtype) {
                 params[index] = paramArgs[index];
             }else{
                 throw new Error(`参数 <${name}> 类型错误,${msg}`);
             }
 
-            if (optional && paramArgs[index] === undefined) {
-                params[index] = paramData.defaultValue;
-            }
+            
         }
     }
     // 添加 context 参数

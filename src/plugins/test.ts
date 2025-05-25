@@ -11,6 +11,7 @@ import { prop } from '../lib/prop.js';
 import * as fs from 'fs'
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
 import { Receive } from 'node-napcat-ts';
+import { Permission } from '../lib/Permission.js';
 async function convertImageToBase64(filePath: string): Promise<string> {
     try {
       const fileData = await fs.promises.readFile(filePath);
@@ -85,6 +86,14 @@ export class test {
         };
     }
 
+    @Permission('Group')
+    @runcod(['tp',"权限测试"],"权限测试，执行此指令返回对应权限")//命令装饰器，用于注册命令
+    async Permission(): Promise<any> {
+        return 'Permission测试'
+    }
+
+
+
     @runcod(["remove"], "移除金币")//命令装饰器，用于注册命令
     @coins(
         10,//金币数量
@@ -93,10 +102,12 @@ export class test {
     async remove(){
         return `移除成功`;
     }
+
     @schedule('* */30 * * * *') // 每30分钟执行一次
     async testschedule() {
         // botlogger.info("定时任务测试")
     }
+
     @prop(
         "testProp",//道具id
         "称号卡",//道具名称

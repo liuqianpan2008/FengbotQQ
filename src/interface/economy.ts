@@ -1,4 +1,4 @@
-import { Prop } from "./prop.js";
+import { UserProp } from "./prop.js";
 
 export interface UserData {
     userId: string; 
@@ -6,7 +6,8 @@ export interface UserData {
         coins: number;
         logs: Economylogs[];
     },
-    props:Prop[]
+    props:UserProp[]
+    Permission:string[]
 }
 export interface Economylogs {
     type: 'add' | 'remove';

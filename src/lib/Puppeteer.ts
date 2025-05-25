@@ -9,7 +9,7 @@ export class HtmlImg {
     async init() {
         if (!this.browser) {
             const options: PuppeteerLaunchOptions = {
-                headless: true,
+                headless: true, // 无头模式，可根据需要设置为false,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -21,6 +21,7 @@ export class HtmlImg {
     }
 
     async render(options: {
+        url?: string;
         template: string;
         templateIsPath?: boolean;
         data: any;
@@ -34,6 +35,7 @@ export class HtmlImg {
         try {
             await this.init();
             const {
+                url,
                 template,
                 templateIsPath = true,
                 data,
@@ -49,14 +51,22 @@ export class HtmlImg {
             const templateContent = templateIsPath ? fs.readFileSync(template, 'utf-8') : template;
 
             // 渲染HTML
-
-            const html = art.render(templateContent, data);
+            let html = '';
+            if (templateContent) {
+                html = art.render(templateContent, data);
+            }
             // 计算高度
 
             // 创建页面
             const page = await this.browser!.newPage();
             await page.setViewport({ width, height });
-            await page.setContent(html, { waitUntil: 'networkidle0' });
+            // 设置页面内容
+            if (url) {
+                await page.goto(url);
+                await page.waitForNetworkIdle();
+            }else{
+                await page.setContent(html, { waitUntil: 'networkidle0' });
+            }
             // 获取document.body.scrollHeight
             
             const bodyheight = await page.evaluate(() => document.body.scrollHeight)  as number;

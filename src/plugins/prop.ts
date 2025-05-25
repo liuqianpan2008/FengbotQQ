@@ -111,9 +111,9 @@ export class Propplu {
                 if(Allprop.propId === prop.propId){
                     Allprop.Num=prop.Num
                     p.push(Allprop) 
+                    s += `名称：${Allprop.propName}---描述：${Allprop.describe}---数量：${prop.Num}\n`;
                 }
             })
-            s += `名称：${prop.propName}---描述：${prop.describe}---数量：${prop.Num}\n`;
         })
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
         return {

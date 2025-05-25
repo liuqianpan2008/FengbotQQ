@@ -141,14 +141,14 @@ export class PluginsFile {
                 await qqBot.upload_group_file({
                     group_id: Number(context.group_id),
                     file: 'data:file;base64,' + file,
-                    name: pluName + '.ts'
+                    name: pluName?.data?.text + '.ts'
                 })
 
             } else {
                 await qqBot.upload_private_file({
                     user_id: Number(context.sender.user_id),
                     file: 'data:file;base64,' + file,
-                    name: pluName + '.ts'
+                    name: pluName?.data?.text + '.ts'
                 })
             }
 

@@ -9,3 +9,7 @@ export interface Prop{
     price: number; // 道具价格
     classConstructor:any;
 }
+export interface UserProp{
+    propId: string;
+    Num: number;
+}

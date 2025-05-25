@@ -1,6 +1,6 @@
 // 添加金币相关的fn装饰器
 
-import { Prop } from "../interface/prop.js";
+import { Prop, UserProp } from "../interface/prop.js";
 import { getUserData, saveUserData } from "./economy.js";
 import botlogger from "./logger.js";
 
@@ -38,8 +38,13 @@ export function getProp(fnName: string): Prop | undefined {
     return Props.get(fnName);
 }
 
-export async function getuserProp(userId: string): Promise<Prop[]> {
-    return await getUserData(userId).props;
+export async function getuserProp(userId: string): Promise<UserProp[]> {
+    const userData = await getUserData(userId);
+    if (!userData) {
+        return [];
+    }else{
+        return userData.props;
+    }
 }
 // 减少道具数量
 export async function reduceProp(userId: string, propId: string, Num: number = 1): Promise<boolean> {
@@ -52,6 +57,9 @@ export async function reduceProp(userId: string, propId: string, Num: number = 1
     }
     // 保存道具数据
     const userData = await getUserData(userId)
+    if (!userData) {
+        return false;
+    }
     userData.props = userProp;
     await saveUserData(userId,userData);
     return true;
@@ -72,6 +80,9 @@ export async function addProp(userId: string, propId: string, Num: number = 1): 
     }
     // 保存道具数据
     const userData = await getUserData(userId)
+    if (!userData) {
+        return false;
+    }
     userData.props = userProp;
     await saveUserData(userId,userData);
     return true;

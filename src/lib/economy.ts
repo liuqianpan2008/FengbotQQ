@@ -6,17 +6,22 @@ import { economy } from "./config.js";
 
 export function addCoins(userId: string, amount: number, reason: string): void {
     const userData = getUserData(userId);
-    userData.economy.coins += amount;
-    userData.economy.logs.unshift({
-        type: 'add',
-        amount: amount,
-        reason: reason,
-        date: formatDate(new Date())
-    });
-    saveUserData(userId, userData);
+    if(userData){
+        userData.economy.coins += amount;
+        userData.economy.logs.unshift({
+            type: 'add',
+            amount: amount,
+            reason: reason,
+            date: formatDate(new Date())
+        });
+        saveUserData(userId, userData);
+    }
 }
 export function removeCoins(userId: string, amount: number, reason: string): void {
     const userData = getUserData(userId);
+    if (!userData) {
+        throw new Error(`未找到用户数据`);
+    }
     if (userData.economy.coins < amount) {
         throw new Error(`${economy.name}不足，需要${amount}${economy.currency},拥有${userData.economy.coins}${economy.currency}`);
     }
@@ -29,19 +34,12 @@ export function removeCoins(userId: string, amount: number, reason: string): voi
     });
      saveUserData(userId, userData);
 }
-export function getUserData(userId: string): UserData {
+export function getUserData(userId: string): UserData|null {
     if (!fs.existsSync(`${economy.data.path}`)) {
         throw new Error(`未找到用户数据目录，请检查配置文件`);
     }
     if (!userId) {
-        return {
-            userId: '',
-            economy: {
-                coins: 0,
-                logs: []
-            },
-            props: []
-        }
+        return null
     }
     if (!fs.existsSync(`${economy.data.path}/${userId}.json`)) {
         const newUserData: UserData = {
@@ -51,7 +49,8 @@ export function getUserData(userId: string): UserData {
                 logs: [],
                 
             },
-            props: []
+            props: [],
+            Permission: []
         };
         fs.writeFileSync(`${economy.data.path}/${userId}.json`, JSON.stringify(newUserData, null, 4));
         return newUserData;
@@ -59,7 +58,7 @@ export function getUserData(userId: string): UserData {
     const userData = JSON.parse(fs.readFileSync(`${economy.data.path}/${userId}.json`, 'utf-8')) as UserData;
     return userData;
 }
-export function  saveUserData(userId: string, userData: UserData): void {
+export function saveUserData(userId: string, userData: UserData): void {
     if (!fs.existsSync(`${economy.data.path}`)) {
         throw new Error(`未找到用户数据目录，请检查配置文件`);
     }
