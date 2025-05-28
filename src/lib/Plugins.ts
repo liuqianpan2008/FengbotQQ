@@ -276,7 +276,12 @@ export async function runplugins() {
                             return;
                         }
                     }
-                    // 执行命令
+                    console.log(JSON.stringify(context))
+                    qqBot.set_msg_emoji_like({
+                        message_id: context.message_id,
+                        set: true,
+                        emoji_id: '124'
+                    })
                     await handleCommand(context, easyplugin, command, parts.slice(1), true);
                     return;
                 }
@@ -327,6 +332,11 @@ export async function runplugins() {
                     }
                 }
                 // 执行命令
+                qqBot.set_msg_emoji_like({
+                    message_id: context.message_id,
+                    set: true,
+                    emoji_id: '124'
+                })
                 await handleCommand(context, plugin, command, args);
 
             } catch (error) {

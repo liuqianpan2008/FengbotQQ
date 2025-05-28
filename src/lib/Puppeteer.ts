@@ -9,7 +9,7 @@ export class HtmlImg {
     async init() {
         if (!this.browser) {
             const options: PuppeteerLaunchOptions = {
-                headless: false, // 无头模式，可根据需要设置为false,
+                headless: true, // 无头模式，可根据需要设置为false,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -39,8 +39,8 @@ export class HtmlImg {
                 template,
                 templateIsPath = true,
                 data,
-                width = 800,
-                height = 1,
+                width = -1,
+                height = -1,
                 type = 'png',
                 quality = 100,
                 fullPage = false,
@@ -86,7 +86,7 @@ export class HtmlImg {
             const bodyheight = await page.evaluate(() => document.body.scrollHeight)  as number;
             const bodywidth = await page.evaluate(() => document.body.scrollWidth)  as number;
             botlogger.info(`获取body高度${bodyheight}和宽度${bodywidth}`)
-            if(bodyheight!= height || bodywidth!= width){
+            if(-1 != height &&  -1 != width){
                 await page.setViewport({ width: bodywidth, height: bodyheight });
                 await page.waitForNetworkIdle();
             }
