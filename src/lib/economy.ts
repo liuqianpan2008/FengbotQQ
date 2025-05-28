@@ -1,4 +1,3 @@
-
 import { UserData } from "../interface/economy.js";
 import fs from 'fs';
 import { economy } from "./config.js";

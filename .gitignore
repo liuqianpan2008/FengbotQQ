@@ -83,6 +83,7 @@ src/plugins/*
 !src/plugins/log.ts
 !src/plugins/ecomony.ts
 !src/plugins/prop.ts
+!src/plugins/Permission.ts
 
 
 /data

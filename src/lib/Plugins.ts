@@ -123,8 +123,8 @@ async function loadPlugins(): Promise<void> {
                             await initializeScheduledTasks(instance);
                         }
                     }
-                } catch (error) {
-                    botlogger.error(`加载插件文件失败 ${file}:`, error);
+                } catch (error: any) {
+                    botlogger.error(`加载插件文件失败 ${file}:`+ error.message);
                 }
             }
         }

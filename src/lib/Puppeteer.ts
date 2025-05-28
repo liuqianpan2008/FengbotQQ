@@ -9,7 +9,7 @@ export class HtmlImg {
     async init() {
         if (!this.browser) {
             const options: PuppeteerLaunchOptions = {
-                headless: true, // 无头模式，可根据需要设置为false,
+                headless: false, // 无头模式，可根据需要设置为false,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -63,16 +63,32 @@ export class HtmlImg {
             // 设置页面内容
             if (url) {
                 await page.goto(url);
+                await page.emulate({
+                    viewport: { width: 375, height: 667 },
+                    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+                });
                 await page.waitForNetworkIdle();
+                if(data.selector){
+                    const element = await page.$(data.selector);
+                    if (element) {
+                        const image = await element.screenshot({ type: type as 'png' | 'jpeg', quality: type === 'jpeg'? quality : undefined });
+                        return image;
+                    }
+                }
+                //加载额外的js
+                page.evaluate(data.urlJs)
             }else{
                 await page.setContent(html, { waitUntil: 'networkidle0' });
             }
             // 获取document.body.scrollHeight
             
+           
             const bodyheight = await page.evaluate(() => document.body.scrollHeight)  as number;
-            botlogger.info(`获取body高度${bodyheight}`)
-            if(bodyheight != height){
-                await page.setViewport({ width, height: bodyheight });
+            const bodywidth = await page.evaluate(() => document.body.scrollWidth)  as number;
+            botlogger.info(`获取body高度${bodyheight}和宽度${bodywidth}`)
+            if(bodyheight!= height || bodywidth!= width){
+                await page.setViewport({ width: bodywidth, height: bodyheight });
+                await page.waitForNetworkIdle();
             }
             // 截图
             const image = await page.screenshot({
