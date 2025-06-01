@@ -84,6 +84,6 @@ src/plugins/*
 !src/plugins/ecomony.ts
 !src/plugins/prop.ts
 !src/plugins/Permission.ts
-
+!src/plugins/wiki.ts
 
 /data
