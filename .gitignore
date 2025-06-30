@@ -85,5 +85,7 @@ src/plugins/*
 !src/plugins/prop.ts
 !src/plugins/Permission.ts
 !src/plugins/wiki.ts
+!src/plugins/mc.ts
 
 /data
+

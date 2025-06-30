@@ -67,17 +67,20 @@ export class test {
             param1,//参数1，用于显示在菜单中
             param2,//参数2，用于显示在菜单中
             param3,//参数3，用于显示在菜单中
+            //渲染优先级 url渲染 > 简易渲染 > 模版渲染
             template: { // 模板配置，用于发送图片内容
                 enabled: true,//是否启用模板，启用将发送图片内容
                 sendText: false,//是否发送文本，启用将发送文本内容，如果都启用则发送两条消息
                 path: path.resolve(__dirname, '..', 'resources', 'test', 'param.html'),//模版路径，推荐按规范放置在resources目录下
+                html: `<div>简约自定义html渲染内容</div>`,//简易渲染,填写html内容
                 render: {//浏览器默认参数设置，用于打开浏览器的设置
                     width: 600, // 模板宽度
                     height: 1, // 模板高度
                     type: 'png',// 模板类型
                     quality: 100,// 模板质量
                     fullPage: false,// 是否全屏
-                    background: true// 是否背景
+                    background: true,// 是否背景
+                    url: 'http://www.baidu.com'// 直接使用网站截图渲染支持90%的网站，需要自行测试
                 }
             },
             toString() { //重写toString方法，用于返回文本内容，启用sendText时将发送文本内容，不启用时将发送图片内容，图片发送失败时发送文字内容

@@ -18,3 +18,4 @@ export const Botconfig = await loadConfig('bot');
 export const PermissionConfig = await loadConfig('permission');
 export const load = await loadConfig('load')
 export const economy = await loadConfig('economy')
+export const mccfg = await loadConfig('mc')
