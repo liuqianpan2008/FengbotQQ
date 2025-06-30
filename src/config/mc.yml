@@ -1,0 +1,4 @@
+#连接配置
+host: localhost
+port: 25575
+password: fenglin123
