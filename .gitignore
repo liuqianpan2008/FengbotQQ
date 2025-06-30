@@ -89,3 +89,5 @@ src/plugins/*
 
 /data
 
+/src/plugins/mc.ts
+/src/config/mc.yml
