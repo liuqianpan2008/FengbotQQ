@@ -14,7 +14,7 @@ import { addPermission, getuserPermissions, IsAdmin, removePermission } from "..
     }
 })
 export class Permission{
-    @runcod(["list", "查看权限"],"使用道具" )
+    @runcod(["list", "查看权限"],"查看权限" )
     async list(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ){

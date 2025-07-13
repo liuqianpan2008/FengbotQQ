@@ -34,18 +34,18 @@ export class Propplu {
             return this.tl(`你没有${propId}道具`,'error',`你没有${propId}道具`)
         }
         
-        if (findprop.Num < Number(Num?.data?.text)) {
+        if (findprop.Num < Number(Num?.data?.text??1)) {
             return this.tl(`道具数量不足`,'error',`道具数量不足`)
         }
         Props.forEach((prop) => {
             if (prop.propId === propId?.data?.text) {
-                if(prop.maxuse<Number(Num?.data?.text)){
+                if(prop.maxuse<Number(Num?.data?.text??1)){
                     return this.tl(`该道具允许最大使用数量为${prop.maxuse}超过最大使用数量`,'error',`该道具允许最大使用数量为${prop.maxuse}超过最大使用数量`)
                 }
             }    
         });
         try {
-            for (let i = 0; i < Number(Num?.data?.text); i++) {
+            for (let i = 0; i < Number(Num?.data?.text??1); i++) {
                 let fn;
                 let classConstructor;
                 let propid=''

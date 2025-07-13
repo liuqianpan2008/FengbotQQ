@@ -3,7 +3,7 @@ import { param, plugins, runcod } from "../lib/decorators.js";
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from "node-napcat-ts/dist/Interfaces.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import { IsAdmin } from "../lib/Permission.js";
+import { IsAdmin, Permission } from "../lib/Permission.js";
 import { Receive } from "node-napcat-ts";
 
 @plugins({
@@ -55,6 +55,7 @@ export class ecomony {
         }
     }
 
+    @Permission("Admin")
     @runcod(["add", "增加"], "增加金币")
     async addecomony(
         @param("QQ号", 'at',) userid: Receive["at"],
@@ -137,7 +138,8 @@ export class ecomony {
         }
         
     }
-
+    
+    @Permission("Admin")
     @runcod(["reduce", "减少"], "减少金币")
     async reduceecomony(
         @param("QQ号", 'at',) userid: Receive["at"],

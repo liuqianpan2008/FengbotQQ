@@ -101,7 +101,7 @@
 
         <!-- 交易记录列表 -->
         <ul class="transaction-list">
-            {{each logs}}
+            {{each logs.slice(0,10)}}
             <li class="transaction-item">
                 <div class="transaction-details">
                     <div class="transaction-time">{{$value.date}}</div>
