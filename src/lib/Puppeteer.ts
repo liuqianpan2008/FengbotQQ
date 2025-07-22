@@ -9,7 +9,7 @@ export class HtmlImg {
     async init() {
         if (!this.browser) {
             const options: PuppeteerLaunchOptions = {
-                headless: true, // 无头模式，可根据需要设置为false,
+                headless: false, // 无头模式，可根据需要设置为false,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',

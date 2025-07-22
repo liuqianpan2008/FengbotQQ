@@ -91,3 +91,6 @@ src/plugins/*
 
 /src/plugins/mc.ts
 /src/config/mc.yml
+botQQ_screenshots/GroupEventData.json
+botQQ_screenshots/GroupWorldData.json
+botQQ_screenshots/bilibiliData.json

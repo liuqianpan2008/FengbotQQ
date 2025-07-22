@@ -271,6 +271,7 @@ export function schedule(cron: string): MethodDecorator {
         // 返回修改后的描述符
         return descriptor;
     };
+
 }
 
 // 添加金币相关的fn装饰器

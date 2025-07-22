@@ -48,6 +48,7 @@ export function getUserData(userId: string): UserData|null {
                 logs: [],
                 
             },
+            events:0,
             props: [],
             Permission: []
         };

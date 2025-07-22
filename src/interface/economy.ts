@@ -6,6 +6,7 @@ export interface UserData {
         coins: number;
         logs: Economylogs[];
     },
+    events:number//触发事件时保护次数
     props:UserProp[]
     Permission:string[]
 }
