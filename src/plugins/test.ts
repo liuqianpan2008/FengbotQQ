@@ -74,6 +74,7 @@ export class test {
                 path: path.resolve(__dirname, '..', 'resources', 'test', 'param.html'),//模版路径，推荐按规范放置在resources目录下
                 // html: `<div>简约自定义html渲染内容</div>`,//简易渲染,填写html内容
                 render: {//浏览器默认参数设置，用于打开浏览器的设置
+                    isgif: true,
                     width: 600, // 模板宽度
                     height: 1, // 模板高度
                     type: 'png',// 模板类型

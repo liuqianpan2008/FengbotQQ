@@ -14,7 +14,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 // 获取指令前缀
 import { Botconfig as config, economy, load, PermissionConfig, saveConfig } from './config.js'
-import { ImageSegment, Receive, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
+import { FileSegment, ImageSegment, Receive, ReplySegment, TextSegment } from "node-napcat-ts/dist/Structs.js";
 import { fileURLToPath } from 'node:url';
 import { qqBot } from "../app.js";
 import { IsPermission } from "./Permission.js";
@@ -40,6 +40,15 @@ function createTextMessage(text: string): TextSegment {
 }
 
 function createImageMessage(base64Data: string): ImageSegment {
+    //动画表情
+    if(base64Data.startsWith('data:image/gif;base64,')){
+        return {
+            type: "image",
+            data: {
+                file: `base64://${base64Data}`,
+            }
+        };
+    }
     return {
         type: "image",
         data: {
@@ -394,6 +403,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                 const templateHtml = result.template.html;
                 const templatePath = result.template.path;
                 const url= result.template.render.url;
+                const isgif = result.template.render?.isgif || false;
                 
                 if (templateHtml) {
                     templateIsPath = false;
@@ -411,6 +421,7 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                         templateIsPath,
                         data: result,
                         url: url,
+                        isgif: isgif,
                         width: result.template.render?.width || 800,
                         height: result.template.render?.height || 600,
                         type: result.template.render?.type || 'png',
@@ -454,7 +465,6 @@ async function handleCommand(context: PrivateFriendMessage | PrivateGroupMessage
                             });
                         }
                     }
-
                 } finally {
                     await htmlImg.close();
                 }

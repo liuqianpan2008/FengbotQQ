@@ -9,8 +9,7 @@ import { createWorker } from 'tesseract.js';
 import { fileURLToPath } from 'url';
 import { PSM } from 'tesseract.js';
 import { Jimp, loadFont } from 'jimp'; // 假设未引入，添加引入语句
-import { Type } from 'js-yaml';
-
+import sharp from 'sharp';
 
 @plugins({
     easycmd: true,
@@ -73,7 +72,7 @@ export class wiki {
         }
     }
 
-    @runcod(['方舟智能点击','智能点击'], `会自动识别文字，安卓模拟器的操作方舟点击操作，优先使用创建的点击步骤`)
+    @runcod(['方舟智能点击', '智能点击'], `会自动识别文字，安卓模拟器的操作方舟点击操作，优先使用创建的点击步骤`)
     async rig(
         @param("点击文本", 'text') targetText: Receive["text"],
         @param("x偏移", 'text', { type: 'text', data: { text: '' } }, true) x1: Receive["text"],
@@ -97,15 +96,15 @@ export class wiki {
             const readxy = await this.readxy(targetText?.data?.text)
             let x = 0
             let y = 0
-            let img ='' 
-            let txst =''
+            let img = ''
+            let txst = ''
             if (readxy) {
                 x = readxy.x1;
                 y = readxy.y1;
                 txst = '记录结果'
                 img = buffer.toString('base64');
-            }else{
-                const data  = await this.recognizeTextPosition(tempFile, targetText.data.text);
+            } else {
+                const data = await this.recognizeTextPosition(tempFile, targetText.data.text);
                 x = data.x
                 y = data.y
                 txst = data.txst
@@ -134,12 +133,12 @@ export class wiki {
                     data: {
                         text: `识别结果：x:${x},y:${y}(${txst})`
                     },
-                },{
+                }, {
                     type: 'image',
                     data: {
                         file: `base64://${img}`
                     }
-                },{
+                }, {
                     type: 'image',
                     data: {
                         file: `base64://${base64Data}`
@@ -166,13 +165,13 @@ export class wiki {
             }
         }
     }
-    @runcod(['方舟滑动','滑动'], `滑动屏幕`)
+    @runcod(['方舟滑动', '滑动'], `滑动屏幕`)
     async huadong(
         @param("name", 'text') name: Receive["text"],
-        @param("type", 'text', { type: 'text', data: { text: '' } },true) type: Receive["text"],
-        @param("距离", 'text', { type: 'text', data: { text: '' } },true) distance: Receive["text"],
-        @param("X", 'text', { type: 'text', data: { text: '' } },true) x1: Receive["text"],
-        @param("y", 'text', { type: 'text', data: { text: '' } },true) y1: Receive["text"],
+        @param("type", 'text', { type: 'text', data: { text: '' } }, true) type: Receive["text"],
+        @param("距离", 'text', { type: 'text', data: { text: '' } }, true) distance: Receive["text"],
+        @param("X", 'text', { type: 'text', data: { text: '' } }, true) x1: Receive["text"],
+        @param("y", 'text', { type: 'text', data: { text: '' } }, true) y1: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
         if (!name?.data?.text) { return; }
@@ -279,7 +278,7 @@ export class wiki {
                 data: {
                     file: `base64://${base64Data}`
                 }
-        }])
+            }])
         if (fs.existsSync(tempFile)) {
             fs.unlinkSync(tempFile);
         }
@@ -288,11 +287,11 @@ export class wiki {
         }
         return '操作成功';
     }
-    @runcod(['方舟输入','输入'], `输入文本`)
+    @runcod(['方舟输入', '输入'], `输入文本`)
     async input(
         @param("输入文本", 'text') text: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
+    ) {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const tempDir = path.resolve(__dirname, '..', '..', 'botQQ_screenshots');
         const tempFile = path.join(tempDir, `screenshot_${Date.now()}.png`);
@@ -306,9 +305,9 @@ export class wiki {
             fs.writeFileSync(tempFile, buffer);
             if (text?.data?.text) {
                 // 使用Base64编码处理中文
-                const encodedText = text.data.text||"";
+                const encodedText = text.data.text || "";
                 const CMD = `${adbPath} -s ${deviceList[0]} shell am broadcast -a ADB_INPUT_TEXT --es msg "${encodedText}"`
-                execSync(CMD);                
+                execSync(CMD);
                 const buffer = await this.getimg(adbPath, deviceList, newtempFile);
                 if (!buffer) {
                     return;
@@ -319,13 +318,13 @@ export class wiki {
                     data: {
                         text: `记录结果：${text.data.text}`
                     },
-                },{
+                }, {
                     type: 'image',
                     data: {
                         file: `base64://${base64Data}`
                     }
                 }
-            ])
+                ])
             }
         }
         catch (error) {
@@ -339,7 +338,7 @@ export class wiki {
             if (fs.existsSync(tempFile)) {
                 fs.unlinkSync(tempFile);
             }
-        }finally  {
+        } finally {
             if (fs.existsSync(tempFile)) {
                 fs.unlinkSync(tempFile);
             }
@@ -349,13 +348,13 @@ export class wiki {
         }
     }
 
-    @runcod(['方舟点击','点击'], `创建一个点击步骤`)
+    @runcod(['方舟点击', '点击'], `创建一个点击步骤`)
     async rig2(
         @param("点击文本", 'text') targetText: Receive["text"],
         @param("x偏移", 'text', { type: 'text', data: { text: '' } }, true) x1: Receive["text"],
         @param("y偏移", 'text', { type: 'text', data: { text: '' } }, true) y1: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
+    ) {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const tempDir = path.resolve(__dirname, '..', '..', 'botQQ_screenshots');
         const tempFile = path.join(tempDir, `screenshot_${Date.now()}.png`);
@@ -380,13 +379,13 @@ export class wiki {
                     data: {
                         text: `记录结果：x:${x1.data.text},y:${y1.data.text}(${targetText.data.text})\n 图片记录`
                     },
-                },{
+                }, {
                     type: 'image',
                     data: {
                         file: `base64://${base64Data}`
                     }
                 }]);
-                this.savetest(targetText.data.text, 'cilik' , Number(x1.data.text) , Number(y1.data.text));
+                this.savetest(targetText.data.text, 'cilik', Number(x1.data.text), Number(y1.data.text));
             }
             return '操作成功';
         } catch (error) {
@@ -409,10 +408,10 @@ export class wiki {
         }
     }
 
-    @runcod(['步骤','查看步骤'], `查看创建的步骤`)
+    @runcod(['步骤', '查看步骤'], `查看创建的步骤`)
     async list(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
+    ) {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'test.json');
         let data: any = {};
@@ -424,30 +423,30 @@ export class wiki {
         for (const key in data) {
             if (data.hasOwnProperty(key)) {
                 const element = data[key];
-                str += `${key}(${element.type?? 'click' }):x:${element.x1},y:${element.y1}\n`;
+                str += `${key}(${element.type ?? 'click'}):x:${element.x1},y:${element.y1}\n`;
             }
         }
         return str;
     }
-    @runcod(['步骤集','查看步骤集'], `查看创建的步骤集`)
-    async lists(){
+    @runcod(['步骤集', '查看步骤集'], `查看创建的步骤集`)
+    async lists() {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'tests.json');
-        let str=''
+        let str = ''
         let data: any = {};
         if (fs.existsSync(filePath)) {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             data = JSON.parse(fileContent);
         }
-        let i=1;
+        let i = 1;
         for (const key in data) {
-           const v = await this.readtests(key)
-           if (v) {
-            str+= `${i++}.${key}:`
-            for (const i in v) {
-                str+= `${v[i].name}(${v[i].type}),`
+            const v = await this.readtests(key)
+            if (v) {
+                str += `${i++}.${key}:`
+                for (const i in v) {
+                    str += `${v[i].name}(${v[i].type}),`
+                }
             }
-           }
         }
         return str;
     }
@@ -456,10 +455,10 @@ export class wiki {
         @param("步骤集名称", 'text') testname: Receive["text"],
         @param("步骤,例子：步骤名称1:类别,步骤名称2:类别", 'text') texts: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
-        let str=''
+    ) {
+        let str = ''
         const tests = texts?.data?.text?.split(',')
-        const datatest:{
+        const datatest: {
             name: string;
             type: 'input' | 'click' | 'slide';
         }[] = [];
@@ -467,42 +466,42 @@ export class wiki {
             for (const test of tests) {
                 const [name, type] = test.split(':');
                 if (type == 'input') {
-                    datatest.push({type,name});
-                }else if (type == 'click'){
+                    datatest.push({ type, name });
+                } else if (type == 'click') {
                     const xy = await this.readxy(name)
                     if (xy) {
-                        datatest.push({type,name});
-                    }else{
-                        str+= `步骤${name}未找到,请创建\n`
+                        datatest.push({ type, name });
+                    } else {
+                        str += `步骤${name}未找到,请创建\n`
                     }
-                }else{
-                    str+= `步骤${name}未找到,请创建\n`
+                } else {
+                    str += `步骤${name}未找到,请创建\n`
                 }
-                
+
             }
-            this.createtests(testname.data.text,datatest);
-            str+= `步骤集${testname.data.text}创建成功\n`
+            this.createtests(testname.data.text, datatest);
+            str += `步骤集${testname.data.text}创建成功\n`
         }
         return str;
     }
-    @runcod(['执行步骤集','runtests'], `执行步骤集`)
+    @runcod(['执行步骤集', 'runtests'], `执行步骤集`)
     async runtest(
         @param("步骤集名称", 'text') name: Receive["text"],
-        @param("步骤,例子：输入值1:输入值2:输入值3:", 'text',{type:'text',data:{text:''}},true) input: Receive["text"],
+        @param("步骤,例子：输入值1:输入值2:输入值3:", 'text', { type: 'text', data: { text: '' } }, true) input: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
+    ) {
         if (!name?.data?.text) {
-            return '步骤集名称不能为空';   
+            return '步骤集名称不能为空';
         }
         if (input?.data?.text == '') {
             return '输入值不能为空';
         }
-        let str=''
+        let str = ''
         const inputs = input?.data?.text?.split(':')
         const tests = await this.readtests(name.data.text)
         const { adbPath, deviceList } = this.getadb();
         if (tests) {
-            for (const test of  tests) {
+            for (const test of tests) {
                 if (test.type == 'input') {
                     if (inputs) {
                         const input = inputs.shift()
@@ -513,29 +512,29 @@ export class wiki {
                             str += `步骤${test.name}执行成功 类别:${test.type}输入值:${input}\n`
                         }
                     }
-                }else if (test.type == 'click'){
+                } else if (test.type == 'click') {
                     const readxy = await this.readxy(test.name)
-                    let cmd=`${adbPath} -s ${deviceList[0]} shell input tap ${readxy?.x1?? 0} ${readxy?.y1??0}`
+                    let cmd = `${adbPath} -s ${deviceList[0]} shell input tap ${readxy?.x1 ?? 0} ${readxy?.y1 ?? 0}`
                     execSync(cmd);
-                    str += `步骤${test.name}执行成功 类别:${test.type}(x:${readxy?.x1?? 0},y:${readxy?.y1??0})\n`
+                    str += `步骤${test.name}执行成功 类别:${test.type}(x:${readxy?.x1 ?? 0},y:${readxy?.y1 ?? 0})\n`
                     await new Promise((resolve) => setTimeout(resolve, 3000));
-                }else if (test.type == 'slide'){
+                } else if (test.type == 'slide') {
                     const readxy = await this.readxy(test.name)
-                    let cmd=`${adbPath} -s ${deviceList[0]} shell input swipe ${readxy?.x1?? 0} ${readxy?.y1??0} ${readxy?.x2?? 0} ${readxy?.y2??0}`
+                    let cmd = `${adbPath} -s ${deviceList[0]} shell input swipe ${readxy?.x1 ?? 0} ${readxy?.y1 ?? 0} ${readxy?.x2 ?? 0} ${readxy?.y2 ?? 0}`
                     execSync(cmd);
-                    str += `步骤${test.name}执行成功 类别:${test.type}(x:${readxy?.x1?? 0},y:${readxy?.y1??0},x2:${readxy?.x2?? 0},y2:${readxy?.y2??0})\n`
+                    str += `步骤${test.name}执行成功 类别:${test.type}(x:${readxy?.x1 ?? 0},y:${readxy?.y1 ?? 0},x2:${readxy?.x2 ?? 0},y2:${readxy?.y2 ?? 0})\n`
                     await new Promise((resolve) => setTimeout(resolve, 3000));
                 }
             }
             await this.tu(context);
             return str;
         }
-        return str??'步骤集不存在';
+        return str ?? '步骤集不存在';
     }
-    @runcod(['方舟状态','截图','状态'], `当前方舟运行状态`)
+    @runcod(['方舟状态', '截图', '状态'], `当前方舟运行状态`)
     async tu(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ){
+    ) {
         if (!context) {
             return;
         }
@@ -557,7 +556,7 @@ export class wiki {
                 data: {
                     file: `base64://${base64Data}`
                 }
-            }, 
+            },
             {
                 type: 'image',
                 data: {
@@ -584,6 +583,28 @@ export class wiki {
             }
         }
     }
+    @runcod(['红点识别', '点击'], `根据点击的红点识别参数`)
+    async recognizeText(@param("识别图片", 'image') image: Receive["image"],
+                        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ) { 
+        if (!image?.data?.url) {
+            return '图片不能为空';
+        }
+        const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        let tempDir = path.resolve(__dirname, '..', '..', 'botQQ_screenshots');
+        let tempFile = path.join(tempDir, `screenshot_${Date.now()}.png`);
+        await this.downloadFile(image.data.url, tempFile);
+        const redDot = await this.findRedDot(tempFile);
+        if (redDot) {
+            fs.unlinkSync(tempFile);
+            const { adbPath, deviceList } = this.getadb();
+            execSync(`${adbPath} -s ${deviceList[0]} shell input tap ${redDot[0].x} ${redDot[0].y}`);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await this.tu(context);
+            return `识别成功`;
+        }
+        return '识别失败';
+    }
     //获取安卓模拟器设备
     getadb() {
         const adbPath = '/opt/homebrew/bin/adb';
@@ -604,9 +625,9 @@ export class wiki {
     }
     async getimg(adbPath: string, deviceList: string[], tempFile: string) {
         if (deviceList.length === 0) {
-            return   
+            return
         }
-        if (!adbPath){
+        if (!adbPath) {
             return
         }
         execSync(`${adbPath} -s ${deviceList[0]} exec-out screencap -p > ${tempFile}`);
@@ -617,9 +638,9 @@ export class wiki {
         }
         return Buffer.concat(chunks);
     }
-    private async recognizeTextPosition(imagePath: string, text: string): Promise<{ x: number; y: number,img:string ,txst:string}> {
+    private async recognizeTextPosition(imagePath: string, text: string): Promise<{ x: number; y: number, img: string, txst: string }> {
         if (!imagePath || !text) {
-            return { x: 0, y: 0,img:'',txst:'' };
+            return { x: 0, y: 0, img: '', txst: '' };
         }
         try {
             const worker = await createWorker();
@@ -649,7 +670,7 @@ export class wiki {
                 throw new Error('未找到目标文本');
             }
             let words: any = []
-            let txst='';
+            let txst = '';
             target.paragraphs.forEach((paragraph) => {
                 paragraph.lines.forEach((line) => {
                     line.words.forEach((word) => {
@@ -658,41 +679,124 @@ export class wiki {
                             x1: word.bbox.x1,
                             y0: word.bbox.y0,
                             y1: word.bbox.y1,
-                            text:  txst += `文本：${line.text}（${Math.floor(word.bbox.x0 + (word.bbox.x1 - word.bbox.x0) / 2)},${Math.floor(word.bbox.y0 + (word.bbox.y1 - word.bbox.y0) / 2)}）\n`
+                            text: txst += `文本：${line.text}（${Math.floor(word.bbox.x0 + (word.bbox.x1 - word.bbox.x0) / 2)},${Math.floor(word.bbox.y0 + (word.bbox.y1 - word.bbox.y0) / 2)}）\n`
                         })
                     });
                 });
             })
             const x = Math.floor(words[0].x0 + (words[0].x1 - words[0].x0) / 2)
             const y = Math.floor(words[0].y0 + (words[0].y1 - words[0].y0) / 2)
-            return {x,y, img:await this.drawCircle(imagePath,x,y) ,txst};
+            return { x, y, img: await this.drawCircle(imagePath, x, y), txst };
         } catch (error) {
             throw new Error(`识别失败：${error instanceof Error ? error.message : '请检查OCR依赖安装'}`);
         }
     }
     //绘制圆形标记
-    private async drawCircle(imagePath: string, x: number,y: number): Promise<string> {
+    private async drawCircle(imagePath: string, x: number, y: number): Promise<string> {
         if (!imagePath) {
             return '';
         }
         const image = await Jimp.read(imagePath);
-            const marker = new Jimp({
-                width: 50,
-                height: 50,
-                color: 0x00000000
-            });
-            marker.scan(0, 0, marker.bitmap.width, marker.bitmap.height,  (x, y, idx) => {
-                const dx = x - 25;
-                const dy = y - 25;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= 25) {
-                    marker.bitmap.data[idx + 3] = 255;
+        const marker = new Jimp({
+            width: 50,
+            height: 50,
+            color: 0x00000000
+        });
+        marker.scan(0, 0, marker.bitmap.width, marker.bitmap.height, (x, y, idx) => {
+            const dx = x - 25;
+            const dy = y - 25;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance <= 25) {
+                marker.bitmap.data[idx + 3] = 255;
+            }
+        });
+        marker.circle({ radius: 5, x: 25, y: 25 });
+        image.composite(marker, x - 10, y - 10);
+        const img = await image.getBase64('image/png');
+        return img.split(',')[1];
+    }
+    // 判断圆形标记位置
+    async findRedDot(imagePath: string): Promise<{ x: number, y: number }[]> {
+        // 读取图像数据
+        if (!imagePath) {
+            return [];
+        }
+        const { data, info } = await sharp(imagePath)
+            .raw()
+            .toBuffer({ resolveWithObject: true });
+
+        const width = info.width;
+        const height = info.height;
+        const channels = info.channels;
+        const pixels = new Uint8Array(data.buffer);
+
+        const redDots: { x: number, y: number }[] = [];
+
+        // 定义红色的阈值（可以根据需要调整）
+        const isRed = (r: number, g: number, b: number) => {
+            return r > 200 && g < 50 && b < 50;
+        };
+
+        // 检查5x5区域是否是圆形红点
+        const isRedDot = (x: number, y: number) => {
+            // 检查中心点必须是红色
+            if (!isPixelRed(x, y)) return false;
+
+            // 检查5x5区域
+            let redCount = 0;
+            const radius = 2; // 5x5区域的半径
+
+            for (let dy = -radius; dy <= radius; dy++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    // 圆形检查：只考虑在半径内的点
+                    if (dx * dx + dy * dy <= radius * radius) {
+                        if (isPixelRed(x + dx, y + dy)) {
+                            redCount++;
+                        }
+                    }
                 }
-            });
-            marker.circle({ radius: 5, x: 25, y: 25 });
-            image.composite(marker, x - 10, y - 10);
-            const img =await image.getBase64('image/png');
-            return img.split(',')[1];
+            }
+
+            // 如果红色像素足够多，则认为是红点
+            return redCount >= 10; // 5x5圆形区域大约有13个像素
+        };
+
+        // 检查单个像素是否是红色
+        const isPixelRed = (x: number, y: number) => {
+            if (x < 0 || x >= width || y < 0 || y >= height) return false;
+            const idx = (y * width + x) * channels;
+            const r = pixels[idx];
+            const g = pixels[idx + 1];
+            const b = pixels[idx + 2];
+            return isRed(r, g, b);
+        };
+
+        // 扫描图像寻找红点
+        for (let y = 2; y < height - 2; y++) {
+            for (let x = 2; x < width - 2; x++) {
+                if (isRedDot(x, y)) {
+                    // 避免重复检测邻近的点
+                    if (!redDots.some(dot => Math.abs(dot.x - x) < 5 && Math.abs(dot.y - y) < 5)) {
+                        redDots.push({ x, y });
+                    }
+                }
+            }
+        }
+
+        return redDots;
+    }
+    //下载文件
+    private async downloadFile(url: string, path: string) {
+        if (!url) {
+            return;
+        }
+        if (!path) {
+            return;
+        }
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        fs.writeFileSync(path, buffer);
     }
     //绘制网格
     private async drawGrid(imagePath: string): Promise<string> {
@@ -718,7 +822,7 @@ export class wiki {
         }
         for (let y = 0; y < height; y += gridSize) {
             // 绘制水平线
-            if (typeof Jimp!== 'undefined' && image instanceof Jimp) {
+            if (typeof Jimp !== 'undefined' && image instanceof Jimp) {
                 image.scan(0, y, width, 1, (xScan, yScan, idx) => {
                     image.bitmap.data[idx + 0] = 0;   // R
                     image.bitmap.data[idx + 1] = 0;   // G
@@ -730,7 +834,7 @@ export class wiki {
         // 线两段标注数字
         for (let x = 0; x < width; x += gridSize) {
             for (let y = 0; y < height; y += gridSize) {
-                if (typeof Jimp!== 'undefined' && image instanceof Jimp) {
+                if (typeof Jimp !== 'undefined' && image instanceof Jimp) {
                     if (font) {
                         image.print({ font, x: x - 10, y: y - 10, text: `${x},${y}` });
                     }
@@ -742,7 +846,7 @@ export class wiki {
         return img.split(',')[1];
     }
     //保存步骤记录
-    private async savetest(test: string,type:'cilik' | 'slide', x1: number, y1: number, x2?:number, y2?:number): Promise<void> {
+    private async savetest(test: string, type: 'cilik' | 'slide', x1: number, y1: number, x2?: number, y2?: number): Promise<void> {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         //json
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'test.json');
@@ -750,36 +854,36 @@ export class wiki {
         if (fs.existsSync(filePath)) {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             data = JSON.parse(fileContent);
-        }else{
+        } else {
             fs.writeFileSync(filePath, JSON.stringify(data));
         }
-        if(data[test]){
-            switch(type){
+        if (data[test]) {
+            switch (type) {
                 case 'cilik':
-                    data[test].x1=x1
-                    data[test].y1=y1
+                    data[test].x1 = x1
+                    data[test].y1 = y1
                     break;
                 case 'slide':
-                    data[test].x1=x1
-                    data[test].y1=y1
-                    data[test].x2=x2
-                    data[test].y2=y2
+                    data[test].x1 = x1
+                    data[test].y1 = y1
+                    data[test].x2 = x2
+                    data[test].y2 = y2
             }
-        }else{
-            switch(type){
+        } else {
+            switch (type) {
                 case 'cilik':
-                    data[test]={type,x1,y1}
+                    data[test] = { type, x1, y1 }
                     break;
                 case 'slide':
-                    data[test]={type,x1,y1,x2,y2}
+                    data[test] = { type, x1, y1, x2, y2 }
             }
-            
+
         }
         fs.writeFileSync(filePath, JSON.stringify(data));
         return;
     }
     //读取步骤记录
-    private async readxy(test: string): Promise< { type:'cilik' | 'slide', x1: number, y1: number, x2?:number, y2?:number } | undefined> {
+    private async readxy(test: string): Promise<{ type: 'cilik' | 'slide', x1: number, y1: number, x2?: number, y2?: number } | undefined> {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'test.json');
         let data: any = {};
@@ -787,15 +891,15 @@ export class wiki {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             data = JSON.parse(fileContent);
         }
-        if(data[test]){
-            return data[test] as { type:'cilik' | 'slide', x1: number, y1: number, x2?:number, y2?:number };
+        if (data[test]) {
+            return data[test] as { type: 'cilik' | 'slide', x1: number, y1: number, x2?: number, y2?: number };
         }
     }
     //创建步骤记录
-    private async createtests(name:string , test: {
+    private async createtests(name: string, test: {
         name: string;
         type: 'input' | 'click' | 'slide';
-        
+
     }[]): Promise<void> {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'tests.json');
@@ -804,12 +908,12 @@ export class wiki {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             data = JSON.parse(fileContent);
         }
-        data[name]=test
+        data[name] = test
         fs.writeFileSync(filePath, JSON.stringify(data));
         return;
     }
     //读取步骤记录
-    private async readtests(name:string): Promise<{
+    private async readtests(name: string): Promise<{
         name: string;
         type: 'input' | 'click' | 'slide';
     }[] | undefined> {
@@ -819,11 +923,11 @@ export class wiki {
         if (fs.existsSync(filePath)) {
             const fileContent = fs.readFileSync(filePath, 'utf-8');
             data = JSON.parse(fileContent);
-            if(data[name]){
-                return data[name] ;
+            if (data[name]) {
+                return data[name];
             }
         }
-        if(data[name]){
+        if (data[name]) {
             return data[name];
         }
     }

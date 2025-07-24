@@ -2,6 +2,11 @@ import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
 import art from 'art-template';
 import * as fs from 'fs';
 import botlogger from './logger.js';
+import { PuppeteerScreenRecorder } from 'puppeteer-screen-recorder';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+
 
 export class HtmlImg {
     private browser: Browser | null = null;
@@ -25,6 +30,7 @@ export class HtmlImg {
         template: string;
         templateIsPath?: boolean;
         data: any;
+        isgif?: boolean;
         width?: number;
         height?: number;
         type?: string;
@@ -36,6 +42,7 @@ export class HtmlImg {
             await this.init();
             const {
                 url,
+                isgif,
                 template,
                 templateIsPath = true,
                 data,
@@ -64,7 +71,7 @@ export class HtmlImg {
             if (url) {
                 await page.goto(url);
                 await page.emulate({
-                    viewport: { width: 375, height: 667 },
+                    viewport: { width: 1080, height: 667 },
                     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
                 });
                 await page.waitForNetworkIdle();
@@ -90,14 +97,36 @@ export class HtmlImg {
                 await page.setViewport({ width: bodywidth, height: bodyheight });
                 await page.waitForNetworkIdle();
             }
+            let image ;
+            if (isgif) {
+                //puppeteer
+                const recorder = new PuppeteerScreenRecorder(page,{
+                    followNewTab: true,
+                    fps: 15,
+                });
+                //base64
+                const __dirname = path.dirname(fileURLToPath(import.meta.url));
+                const tempDir = path.resolve(__dirname, '..', '..', 'botQQ_Puppeteer',`${Date.now()}.mp4`);
+                await recorder.start(tempDir);
+                await new Promise(resolve => setTimeout(resolve, 3 * 1000));
+                await recorder.stop();
+                const ffmpegPath = '/Users/fenglin/Desktop/botQQ/ffmpeg/ffmpeg'
+                execSync(`${ffmpegPath} -i ${tempDir} -vf "fps=15,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -y ${tempDir}.gif`);
+                botlogger.info(`转换为gif成功!`)
+                image = fs.readFileSync(`${tempDir}.gif`,{
+                    encoding: 'base64'
+                });
+                fs.unlinkSync(tempDir);
+                fs.unlinkSync(`${tempDir}.gif`);
+            }else{
+                image = await page.screenshot({
+                    type: type as 'png' | 'jpeg',
+                    quality: type === 'jpeg' ? quality : undefined,
+                    fullPage,
+                    omitBackground: !background
+                });
+            }
             // 截图
-            const image = await page.screenshot({
-                type: type as 'png' | 'jpeg',
-                quality: type === 'jpeg' ? quality : undefined,
-                fullPage,
-                omitBackground: !background
-            });
-
             await page.close();
             return image;
 
