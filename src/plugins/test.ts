@@ -89,6 +89,39 @@ export class test {
             }
         };
     }
+    @runcod(["reply"], "应用实例测试" )//命令装饰器，用于注册命令
+    async testparam(
+        @param("参数1", 'reply') param1: Receive["reply"],//参数装饰器，用于解析参数
+    ): Promise<any> {
+        if (!param1) {
+            return "请输入正确的参数格式: #test param <字符串> <数字>";//返回错误信息，用于显示在菜单中
+        }
+        const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
+        // 返回带模板的响应
+        return {
+            param1,//参数1，用于显示在菜单中
+            //渲染优先级 url渲染 > 简易渲染 > 模版渲染
+            template: { // 模板配置，用于发送图片内容
+                enabled: true,//是否启用模板，启用将发送图片内容
+                sendText: false,//是否发送文本，启用将发送文本内容，如果都启用则发送两条消息
+                // path: path.resolve(__dirname, '..', 'resources', 'test', 'param.html'),//模版路径，推荐按规范放置在resources目录下
+                html: `<div>${JSON.stringify(param1)}</div>`,//简易渲染,填写html内容
+                render: {//浏览器默认参数设置，用于打开浏览器的设置
+                    isgif: false,
+                    width: 600, // 模板宽度
+                    height: 1, // 模板高度
+                    type: 'png',// 模板类型
+                    quality: 100,// 模板质量
+                    fullPage: false,// 是否全屏
+                    background: true,// 是否背景
+                    // url: 'http://www.baidu.com'// 直接使用网站截图渲染支持90%的网站，需要自行测试
+                }
+            },
+            toString() { //重写toString方法，用于返回文本内容，启用sendText时将发送文本内容，不启用时将发送图片内容，图片发送失败时发送文字内容
+                return `参数1(字符串): ${param1}`;
+            }
+        };
+    }
 
     @Permission('Group')
     @runcod(['tp',"权限测试"],"权限测试，执行此指令返回对应权限")//命令装饰器，用于注册命令

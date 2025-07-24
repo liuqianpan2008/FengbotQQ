@@ -210,6 +210,12 @@ export async function runplugins() {
         // 设置消息处理器
         qqBot.on('message', async (context) => {
             try {
+                if(context.message[0].type === "reply" && context.message[1].type === "text"){
+                    //交换
+                    const temp = context.message[0];
+                    context.message[0] = context.message[1];
+                    context.message[1] = temp;
+                }
                 if (context.message[0].type !== 'text') {
                     return;
                 }
@@ -285,7 +291,7 @@ export async function runplugins() {
                             return;
                         }
                     }
-                    console.log(JSON.stringify(context))
+                    // 响应回应
                     qqBot.set_msg_emoji_like({
                         message_id: context.message_id,
                         set: true,
