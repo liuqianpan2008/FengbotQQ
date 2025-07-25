@@ -89,13 +89,21 @@ export class test {
             }
         };
     }
-    @runcod(["reply"], "应用实例测试" )//命令装饰器，用于注册命令
+    @runcod(["reply"], "引用实例测试" )//命令装饰器，用于注册命令
     async testparam(
-        @param("参数1", 'reply') param1: Receive["reply"],//参数装饰器，用于解析参数
+        @param("参数3", 'reply') param3: Receive["reply"],//引用参数必须是最后一个
+        @param("参数1", 'text') param1: Receive["text"],
+        @param("参数2", 'at') param2: Receive["at"],
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ): Promise<any> {
         if (!param1) {
-            return "请输入正确的参数格式: #test param <字符串> <数字>";//返回错误信息，用于显示在菜单中
+            return "请输入正确的参数格式: #test reply <引用消息>";
         }
+
+        const msg = await qqBot.get_msg({
+            message_id: Number(param3.data.id),
+        })
+        
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
         // 返回带模板的响应
         return {
@@ -105,7 +113,7 @@ export class test {
                 enabled: true,//是否启用模板，启用将发送图片内容
                 sendText: false,//是否发送文本，启用将发送文本内容，如果都启用则发送两条消息
                 // path: path.resolve(__dirname, '..', 'resources', 'test', 'param.html'),//模版路径，推荐按规范放置在resources目录下
-                html: `<div>${JSON.stringify(param1)}</div>`,//简易渲染,填写html内容
+                html: `<div>${JSON.stringify(msg.message)}参数一${param1.data.text}参数二${param2.data.qq} 参数三${param3.data.id}</div>`,//简易渲染,填写html内容
                 render: {//浏览器默认参数设置，用于打开浏览器的设置
                     isgif: false,
                     width: 600, // 模板宽度
@@ -123,6 +131,8 @@ export class test {
         };
     }
 
+
+    
     @Permission('Group')
     @runcod(['tp',"权限测试"],"权限测试，执行此指令返回对应权限")//命令装饰器，用于注册命令
     async Permission(): Promise<any> {

@@ -113,9 +113,8 @@ export class HtmlImg {
                 const ffmpegPath = '/Users/fenglin/Desktop/botQQ/ffmpeg/ffmpeg'
                 execSync(`${ffmpegPath} -i ${tempDir} -vf "fps=15,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -y ${tempDir}.gif`);
                 botlogger.info(`转换为gif成功!`)
-                image = fs.readFileSync(`${tempDir}.gif`,{
-                    encoding: 'base64'
-                });
+                //读取文件Uint8Array
+                image = fs.readFileSync(`${tempDir}.gif`);
                 fs.unlinkSync(tempDir);
                 fs.unlinkSync(`${tempDir}.gif`);
             }else{
