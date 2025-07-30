@@ -1,5 +1,7 @@
 import { Bot } from "./lib/Bot.js";
 import botlogger from './lib/logger.js';
+import http from 'http'
+import { skd } from "./plugins/skd.js";
 export const qqBot = new Bot()
 async function main() {
   try {
@@ -7,6 +9,14 @@ async function main() {
       botlogger.info("正在启动机器人...");
       await qqBot.run();
       botlogger.info("机器人启动成功");
+      //创建http服务器
+      const server = http.createServer(async (_req: any, res: { end: (arg0: string) => void; }) => {
+        let SKD = new skd()
+        const data = await SKD.queryMe()
+        res.end(`${JSON.stringify(data.data)}`)
+        
+      })
+      server.listen(6654)
   } catch (error) {
       botlogger.error("启动失败:", error);
       process.exit(1);

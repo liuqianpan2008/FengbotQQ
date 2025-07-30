@@ -22,57 +22,10 @@ import sharp from 'sharp';
         description: "查看帮助信息"
     }
 })
-export class wiki {
+export class abd {
 
-    @runcod(["干员", "查询干员"], `干员bilibiliWiki截图`)
-    async browser(
-        @param("干员名称", 'text') name: Receive["text"],
-        @param("内容信息", 'text', { type: 'text', data: { text: '' } }, true) element: Receive["text"]
-    ) {
-        let sandbox = ''
-        switch (element?.data?.text) {
-            case '评论':
-                sandbox = '#flowthread'
-                break;
-            case '语音':
-                sandbox = '::-p-xpath(/html/body/div[2]/div[2]/div[4]/div[5]/div/div[27])'
-                break;
-            case '档案':
-                sandbox = '::-p-xpath(/html/body/div[2]/div[2]/div[4]/div[5]/div/div[24])'
-                break;
-            case '模组':
-                sandbox = '::-p-xpath(/html/body/div[2]/div[2]/div[4]/div[5]/div/div[21])'
-                break;
-            case '基建':
-                sandbox = '::-p-xpath(/html/body/div[2]/div[2]/div[4]/div[5]/div/div[19])'
-                break;
-            case '技能材料':
-                sandbox = '::-p-xpath(/html/body/div[2]/div[2]/div[4]/div[5]/div/div[17])'
-            default:
-                sandbox = ''
-        }
-        return {
-            selector: sandbox,
-            template: { // 模板配置，用于发送图片内容
-                enabled: true,//是否启用模板，启用将发送图片内容
-                sendText: false,//是否发送文本，启用将发送文本内容，如果都启用则发送两条消息
-                render: {//浏览器默认参数设置，用于打开浏览器的设置
-                    width: 600, // 模板宽度
-                    height: 1, // 模板高度
-                    type: 'png',// 模板类型
-                    quality: 100,// 模板质量
-                    fullPage: false,// 是否全屏
-                    background: true,
-                    url: `https://wiki.biligame.com/arknights/${name?.data?.text}`// 模板路径，推荐按规范放置在resources目录下
-                }
-            },
-            toString() { //重写toString方法，用于返回文本内容，启用sendText时将发送文本内容，不启用时将发送图片内容，图片发送失败时发送文字内容
-                return `访问${name?.data?.text}`;
-            }
-        }
-    }
 
-    @runcod(['方舟智能点击', '智能点击'], `会自动识别文字，安卓模拟器的操作方舟点击操作，优先使用创建的点击步骤`)
+    @runcod(['智能点击', '智能点击'], `会自动识别文字，安卓模拟器的操作方舟点击操作，优先使用创建的点击步骤`)
     async rig(
         @param("点击文本", 'text') targetText: Receive["text"],
         @param("x偏移", 'text', { type: 'text', data: { text: '' } }, true) x1: Receive["text"],
@@ -165,7 +118,7 @@ export class wiki {
             }
         }
     }
-    @runcod(['方舟滑动', '滑动'], `滑动屏幕`)
+    @runcod(['滑动', '滑动'], `滑动屏幕`)
     async huadong(
         @param("name", 'text') name: Receive["text"],
         @param("type", 'text', { type: 'text', data: { text: '' } }, true) type: Receive["text"],
@@ -287,7 +240,7 @@ export class wiki {
         }
         return '操作成功';
     }
-    @runcod(['方舟输入', '输入'], `输入文本`)
+    @runcod(['输入', '输入'], `输入文本`)
     async input(
         @param("输入文本", 'text') text: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
@@ -348,7 +301,7 @@ export class wiki {
         }
     }
 
-    @runcod(['方舟点击', '点击'], `创建一个点击步骤`)
+    @runcod(['点击', '点击'], `创建一个点击步骤`)
     async rig2(
         @param("点击文本", 'text') targetText: Receive["text"],
         @param("x偏移", 'text', { type: 'text', data: { text: '' } }, true) x1: Receive["text"],
@@ -531,7 +484,7 @@ export class wiki {
         }
         return str ?? '步骤集不存在';
     }
-    @runcod(['方舟状态', '截图', '状态'], `当前方舟运行状态`)
+    @runcod(['状态', '截图', '状态'], `当前方舟运行状态`)
     async tu(
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
@@ -585,8 +538,8 @@ export class wiki {
     }
     @runcod(['红点识别', '点击'], `根据点击的红点识别参数`)
     async recognizeText(@param("识别图片", 'image') image: Receive["image"],
-                        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
-    ) { 
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ) {
         if (!image?.data?.url) {
             return '图片不能为空';
         }

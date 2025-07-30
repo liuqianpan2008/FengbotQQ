@@ -9,10 +9,20 @@
     "dev": "nodemon --watch src --ext ts,yml --exec \"node --no-warnings --loader=ts-node/esm --import=ts-node/esm src/app.ts\"",
     "start": "npm run build && node dist/app.js"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "https-proxy-agent": "^7.0.0",
+    "@skland-x/core": "workspace:*",
+    "@date-fns/tz": "^1.2.0",
+    "date-fns": "^4.1.0",
+    "defu": "^6.1.4",
+    "unctx": "^2.4.1",
+    "unstorage": "^1.16.0",
     "@renmu/bili-api": "^2.7.0",
     "@types/sharp": "^0.32.0",
     "art-template": "^4.13.2",
@@ -34,6 +44,13 @@
     "yaml": "^2.6.1"
   },
   "devDependencies": {
+    "https-proxy-agent": "^7.0.0",
+    "@skland-x/core": "workspace:*",
+    "@date-fns/tz": "^1.2.0",
+    "date-fns": "^4.1.0",
+    "defu": "^6.1.4",
+    "unctx": "^2.4.1",
+    "unstorage": "^1.16.0",
     "@types/js-yaml": "^4.0.9",
     "@types/minimist": "^1.2.5",
     "@types/node": "^16.18.126",
