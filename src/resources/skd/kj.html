@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消费记录</title>
+    <style>
+        body { background-color: #1a1a1a; color: #e0e0e0; font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #ffffff; text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .transaction-table { width: 100%; border-collapse: collapse; }
+        .transaction-table th { background-color: #2d2d2d; color: #ffffff; padding: 12px 15px; text-align: left; }
+        .transaction-table td { background-color: #242424; padding: 12px 15px; border-bottom: 1px solid #333; }
+        .transaction-table tr:hover td { background-color: #333; transition: background-color 0.3s; }
+        .platform-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: white; }
+        .platform-ios { background-color: #007aff; }
+        .platform-android { background-color: #34c759; }
+        .platform-other { background-color: #8e8e93; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>消费记录</h1>
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>平台</th>
+                    <th>金额</th>
+                    <th>商品名称</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{each data}}<tr>
+                    <td>
+                        {{if $value.platform === 0}}
+                            <span class="platform-badge platform-ios">iOS</span>
+                        {{else if $value.platform === 1}}
+                            <span class="platform-badge platform-android">Android</span>
+                        {{else}}
+                            <span class="platform-badge platform-other">其他</span>
+                        {{/if}}
+                    </td>
+                    <td>{{$value.amount/100}} 元</td>
+                    <td>{{$value.productName}}</td>
+                </tr>{{/each}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
