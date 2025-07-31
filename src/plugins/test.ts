@@ -20,7 +20,7 @@ async function convertImageToBase64(filePath: string): Promise<string> {
       console.error('图片转换失败:', error);
       return '';
     }
-  }
+}
 @plugins({
     easycmd: true,//是否启用简易命令，启用将将命令注册为<命令名称>，不启用将注册为#<插件名称> <命令名称>
     name: "测试插件", //插件名称，用于显示在菜单中
@@ -39,10 +39,22 @@ export class test {
             event.message.forEach(async (message) => {
                 if (message.type === 'text') {
                     if (message.data.text === '自测') {
-                        await event.quick_action([{
-                            type: 'text',
-                            data: { text: `插件加载事件测试` }
-                        }]);
+                        // await qqBot.send_group_msg({
+                        //     group_id: Number(211249983),
+                        //     message: [{
+                        //         "type": "node",
+                        //         "data": {
+                        //             "user_id": "161009029", // [发]
+                        //             "nickname": "雪雪看不见我", // [发]
+                        //             "content": [{
+                        //                 "type": "text",
+                        //                 "data": {
+                        //                     "text": "测试"
+                        //                 }
+                        //             }] // [发]
+                        //         }
+                        //     }]
+                        // });
                     }
                 }
             })

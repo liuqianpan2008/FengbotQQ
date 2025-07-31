@@ -7,7 +7,17 @@ import path from 'path';
 import { fileURLToPath } from "url";
 import crypto from 'crypto'
 import botlogger from "../lib/logger.js";
+import { qqBot } from "../app.js";
 
+async function convertImageToBase64(filePath: string): Promise<string> {
+    try {
+      const fileData = await fs.promises.readFile(filePath);
+      return `data:image/jpeg;base64,${fileData.toString('base64')}`;
+    } catch (error) {
+      console.error('图片转换失败:', error);
+      return '';
+    }
+}
 type Character = {
     uid: string;
     isOfficial: boolean;
@@ -69,6 +79,9 @@ export class skd {
             return '该通行证未查询到绑定的账号'
         }
         this.saveBinding(context?.sender?.user_id, token?.data?.text)
+        qqBot.delete_msg({
+            message_id: context.message_id,
+        })
         return `绑定账号：${characterList.map((i: { nickName: string; }) => i.nickName).join(',')}，绑定成功`
     }
 
@@ -121,22 +134,26 @@ export class skd {
     }
     @runcod(['个人卡片', 'skd卡片','卡片','skdCard'], `skd查询干员信息`)
     async query(
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
         @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
          context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
+        const serid =userid?.data?.qq??context?.sender?.user_id
+        if (!userid) {
+            return '请输入干员名称'
+        }
         let indexNum = 0
         if (!index?.data?.text || isNaN(Number(index.data.text))) {
             indexNum = 0
         } else {
             indexNum = Number(index.data.text)
         }
-        const data = await this.getInfo(context?.sender?.user_id, indexNum)
+        const data = await this.getInfo(Number(serid), indexNum)
         if (data === '-1') {
             return this.getErronStr()
         }
         const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
         const info = await this.userInfoData(data as any)
-        console.log(JSON.stringify(info));
         return {
             data: info,
             pluginResources: path.resolve(__dirname, '..', 'resources', 'skd'),
@@ -227,16 +244,18 @@ export class skd {
     }
     @runcod(['基建卡片', 'skd基建卡片','基建','skdBuildingCard'], `skd查询干员信息`)
     async buildingCard(
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
         @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
     ) {
+        const serid = Number(userid?.data?.qq??context?.sender?.user_id)
         let indexNum = 0
         if (!index?.data?.text || isNaN(Number(index.data.text))) {
             indexNum = 0
         } else {
             indexNum = Number(index.data.text)
         }
-        const data = await this.getInfo(context?.sender?.user_id, indexNum)
+        const data = await this.getInfo(serid, indexNum)
         if (data === '-1') {
             return this.getErronStr()
         }
@@ -310,47 +329,120 @@ export class skd {
         return data
 
     }
-    @runcod(['qd'], `森空岛签到`)
-    async sign(
+    @runcod(['我的干员', '我的干员数据'], `查询我的干员数据`)
+    async myChars(
+        @param("干员名称", 'text',) name: Receive["text"],
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
         @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
 
     ) {
-        const tokenList = await this.getBinding(context?.sender?.user_id)
-        if (tokenList.length === 0) {
-            return this.getErronStr()
+        const serid = Number(userid?.data?.qq??context?.sender?.user_id)
+        if (!name?.data?.text) {
+            return '请输入干员名称'
         }
+        const Charsname = name.data.text
+
         let indexNum = 0
         if (!index?.data?.text || isNaN(Number(index.data.text))) {
             indexNum = 0
         } else {
             indexNum = Number(index.data.text)
         }
-        const token = tokenList[indexNum]
-        if (!token) {
+
+        const data = await this.getInfo(serid, indexNum)
+        if (data === '-1') {
             return this.getErronStr()
         }
-        const { code } = await auth(token);
-        const { cred, token: signToken } = await signIn(code);
-        const { list } = await getBinding(cred, signToken);
-        const characterList = (list.filter((i: { appCode: string; }) => i.appCode === 'arknights').map((i: { bindingList: any; }) => i.bindingList).flat()) as Character[]
-        let data = await attendance(cred, signToken, {
-            uid: characterList[0].uid,
-            gameId: characterList[0].channelMasterId,
-        })
-        if (data.code === 0 && data.message === 'OK') {
-            return `签到成功${data.data.awards.length > 0 ? `，获得了${data.data.awards.map((a: { resource: { name: any; }; count: any; }) => `「${a.resource.name}」${a.count}个`).join(',')}` : ''}`
-        }else{
-            return '已经签过到了，无需在操作'
+        const chars = (data as any)?.chars
+        
+        const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
+        const dataPath = path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','gamedata','excel','character_table.json')
+        const Rdata:any = JSON.parse(fs.readFileSync(dataPath,'utf-8'))
+        let charId = ''
+        for(let key in Rdata){
+            if(Rdata[key].name === Charsname){
+                charId = key
+            }
         }
+        const char = Rdata[charId]
+        if(!char){
+            return '干员不存在'
+        }
+        
+        const Userchar = chars.find((item:any)=>item.charId === charId)
+        if(!Userchar){
+            return `您没有${Charsname}干员`
+        }
+        const UserDataRes = await this.charsReplace(Userchar)
+        return {
+            data:UserDataRes,
+            pluginResources: path.resolve(__dirname, '..', 'resources', 'skd'),
+            template: {
+                enabled: true,//是否启用模板，启用将发送图片内容
+                path: path.resolve(__dirname, '..', 'resources', 'skd', 'chars.html'),//模版路径，推荐按规范放置在resources目录下
+                render: {//浏览器默认参数设置，用于打开浏览器的设置
+                    width: 600, // 模板宽度
+                    height: 1, // 模板高度
+                    type: 'png',// 模板类型
+                    quality: 100,// 模板质量
+                    fullPage: false,// 是否全屏
+                    background: true,// 是否背景
+                }
+            }
+        }
+
+
+    }
+    // 处理干员码值替换
+    async charsReplace(data:any){
+        // 取干员名字
+        const __dirname = path.dirname(fileURLToPath(import.meta.url)); //获取当前文件的目录名
+        const dataPath = path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','gamedata','excel','character_table.json')
+        const Rdata:any = JSON.parse(fs.readFileSync(dataPath,'utf-8'))
+        data.charName = Rdata[data.charId].name
+        // 取干员头像
+        data.charPortrait = await convertImageToBase64(path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','avatar',data.charId+'.png'))
+        // 取干员技能
+        const skillPath = path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','gamedata','excel','skill_table.json')
+        const skillData:any = JSON.parse(fs.readFileSync(skillPath,'utf-8'))
+        data.skills.forEach(async (item:any)=>{
+            item.skillName = skillData[item.id].levels[0].name
+            item.skillIcon = await convertImageToBase64(path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','skill','skill_icon_'+item.id+'.png'))
+        })
+        // 取干员模组
+        const equipPath = path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','gamedata','excel','uniequip_table.json')
+        const equipData:any = JSON.parse(fs.readFileSync(equipPath,'utf-8'))
+        data.equip.forEach((item:any)=>{
+            item.equipName = equipData.equipDict[item.id].uniEquipName
+        })
+        // 取干员皮肤信息
+        const skinPath = path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','gamedata','excel','skin_table.json')
+        const skinData:any = JSON.parse(fs.readFileSync(skinPath,'utf-8'))
+        data.skinName = skinData.charSkins[data.skinId].displaySkin.skinName
+        console.log(path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','skin',data.skinId.replace('@','_')+'.png'));
+        //模糊搜索文件取第一个 path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','skin',data.skinId.replace('@','_')+'.png')
+        const files = fs.readdirSync(path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','skin'))
+        const file = files.find((item:any)=>item.indexOf(data.skinId.replace('@','_')) !== -1)
+        if(file){
+            data.skinBank = await convertImageToBase64(path.resolve(__dirname, '..', 'resources', 'skd', 'ArknightsGameResource','skin',file))
+        }
+        // 格式化获取时间
+        function formatTime(time: Date) {
+            return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds();
+        }
+        data.gainTime = formatTime(new Date(data.gainTime * 1000))
+        return data
     }
     @runcod(['kj'], `我的氪金`)
     async kj(
         @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
 
     ) {
-        const tokenList = await this.getBinding(context?.sender?.user_id)
+        const serid = Number(userid?.data?.qq??context?.sender?.user_id)
+        const tokenList = await this.getBinding(serid)
         if (tokenList.length === 0) {
             return this.getErronStr()
         }
@@ -404,10 +496,12 @@ export class skd {
     @runcod(['jczl','集成战略','集成查询','jc'], `集成战略查询`)
     async jczl(
         @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
         context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
 
     ) {
-        const tokenList = await this.getBinding(context?.sender?.user_id)
+        const serid = Number(userid?.data?.qq??context?.sender?.user_id)
+        const tokenList = await this.getBinding(serid)
         if (tokenList.length === 0) {
             return this.getErronStr()
         }
@@ -462,6 +556,44 @@ export class skd {
             }
             
         }
+    }
+
+    @runcod(['qd','签到'], `签到`)
+    async sign(
+        @param("userid", 'at', { type: 'at', data: { qq: '' } }, true) userid: Receive["at"],
+        @param("顺序", 'text', { type: 'text', data: { text: '' } }, true) index: Receive["text"],
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ) {
+        const serid = Number(userid?.data?.qq??context?.sender?.user_id)
+        const tokenList = await this.getBinding(serid)
+        if (tokenList.length === 0) {
+            return this.getErronStr()
+        }
+        let indexNum = 0
+        if (!index?.data?.text || isNaN(Number(index.data.text))) {
+            indexNum = 0
+        } else {
+            indexNum = Number(index.data.text)
+        }
+        const token = tokenList[indexNum]
+        if (!token) {
+            return this.getErronStr()
+        }
+        const { code } = await auth(token);
+        const { cred, token: signToken } = await signIn(code);
+        const { list } = await getBinding(cred, signToken);
+        const characterList = (list.filter((i: { appCode: string; }) => i.appCode === 'arknights').map((i: { bindingList: any; }) => i.bindingList).flat()) as Character[]
+        if (characterList.length === 0) {
+            return '-1'
+        }
+        const sign = await attendance(cred,signToken,{
+            uid:characterList[0].uid,
+            gameId:characterList[0].channelMasterId,
+        })
+        if (sign) {
+            return `签到成功, 获得了${sign.data.awards.map((a: { resource: { name: any; }; count: any; }) => `「${a.resource.name}」${a.count}个`).join(',')}`
+        }
+        return '已经签到过了'
     }
     private async getTimestamp() {
         return String(Math.floor(Date.now() / 1000) - 2);
@@ -613,6 +745,6 @@ export class skd {
         return playerInfo.data
     }
     private getErronStr():string{
-        return '登录 森空岛(https://www.skland.com/)网页版 后，打开 https://web-api.skland.com/account/info/hg 记下 content 字段的值,发送 #绑定skd content即可完成绑定'
+        return '登录 森空岛(https://www.skland.com/)网页版 后，打开 https://web-api.skland.com/account/info/hg 记下 content 字段的值,发送 #绑定skd [content]即可完成绑定'
     }
 }

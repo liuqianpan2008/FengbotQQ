@@ -126,9 +126,10 @@ export class Group {
                         if (!data) {
                             return
                         }
+                        console.log(JSON.stringify(data));
                         await qqBot.send_group_msg({
                             group_id: Number(e.group_id),
-                            message: (data as any),
+                            message: [data as any],
                         })
                         lmsg = '';
                     }
@@ -649,7 +650,15 @@ export class Group {
                 (msg.message[i] as FileSegment).data.file = filePath
             }
         }
-        await this.saveKeywordReply(context.group_id, keyword.data.text, msg.message);
+        const nodemsg={
+            "type": "node",
+            "data": {
+                "user_id": msg.sender.user_id, // [发]
+                "nickname": msg.sender.nickname, // [发]
+                "content": msg.message
+            }
+        }
+        await this.saveKeywordReply(context.group_id, keyword.data.text,nodemsg);
         return "记录成功";
     }
 
@@ -685,7 +694,7 @@ export class Group {
 
 
     //保存关键词回复
-    private async saveKeywordReply(group_id: number, keyword: string, reply: Receive[keyof Receive][]): Promise<void> {
+    private async saveKeywordReply(group_id: number, keyword: string, reply: any): Promise<void> {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
         const filePath = path.join(__dirname, '..', '..', 'botQQ_screenshots', 'GroupKeywordReply.json');
         let data: any = {};
