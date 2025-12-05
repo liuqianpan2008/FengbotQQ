@@ -414,7 +414,6 @@ export class Group {
             success: false,
             event: 0
         }
-
     }
 
     //设置事件
