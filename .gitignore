@@ -97,5 +97,4 @@ botQQ_screenshots/bilibiliData.json
 botQQ_screenshots/bilibiliSpace.json
 
 /botQQ_Puppeteer
-/botQQ_screenshots
-.gitignore
+/botQQ_screenshots/
