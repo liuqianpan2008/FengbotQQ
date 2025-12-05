@@ -5,7 +5,7 @@ import * as yaml from 'js-yaml'
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-async function loadConfig(file: string): Promise<any> {
+export async function loadConfig(file: string): Promise<any> {
     const configPath = path.join(__dirname, `../config/${file}.yml`);  // 保持源码与编译后一致
     return await yaml.load(fs.readFileSync(configPath, 'utf8')) as any;
 }
@@ -19,3 +19,5 @@ export const PermissionConfig = await loadConfig('permission');
 export const load = await loadConfig('load')
 export const economy = await loadConfig('economy')
 export const mccfg = await loadConfig('mc')
+export const flToolConfig = await loadConfig('fenglinTool')
+

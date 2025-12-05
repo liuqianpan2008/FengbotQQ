@@ -12,6 +12,7 @@ import * as fs from 'fs'
 import { GroupMessage, PrivateFriendMessage, PrivateGroupMessage } from 'node-napcat-ts/dist/Interfaces.js';
 import { Receive } from 'node-napcat-ts';
 import { Permission } from '../lib/Permission.js';
+import { BotPlugin } from './plugin.js';
 async function convertImageToBase64(filePath: string): Promise<string> {
     try {
       const fileData = await fs.promises.readFile(filePath);
@@ -32,8 +33,9 @@ async function convertImageToBase64(filePath: string): Promise<string> {
         description: "显示帮助信息" //帮助信息描述
     }
 })
-export class test {
+export class test  extends BotPlugin {
     constructor() {
+        super('test');
         //构造函数内可以再次注册qqBot的事件
         qqBot.on('message', async (event) => {
             event.message.forEach(async (message) => {
@@ -61,6 +63,7 @@ export class test {
         })
         botlogger.info("测试插件加载成功")
     }
+    
     @runcod(
         ["param"], //命令名称，用于触发命令
         "参数实例" //命令描述，用于显示在默认菜单中

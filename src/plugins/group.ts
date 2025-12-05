@@ -126,7 +126,18 @@ export class Group {
                         if (!data) {
                             return
                         }
-                        console.log(JSON.stringify(data));
+                        let msg = ((data as any).data.content) as any
+                        //console.log(JSON.stringify(msg));
+                        for (let i = 0; i < msg.length; i++) {
+                            if (msg[i].type == 'image') {
+                                const image = msg[i]  as ImageSegment
+                                (msg[i] as ImageSegment).data = {
+                                    file: await convertImageToBase64(image.data.file),
+                                }
+                            }
+                        }
+                        ((data as any).data.content) = msg
+                        
                         await qqBot.send_group_msg({
                             group_id: Number(e.group_id),
                             message: [data as any],
@@ -641,10 +652,18 @@ export class Group {
                 const image = msg.message[i]  as ImageSegment
                 let imagePath = path.join('/Volumes/liuqianpan2008/MACServer/Keyimage', image.data.file)
                 await this.downloadFile((image?.data as any).url, imagePath);
-                (msg.message[i] as ImageSegment).data.file = imagePath
+                (msg.message[i] as ImageSegment).data = {
+                    file: imagePath,
+                }
             }
             if(msg.message[i].type == 'file'){
                 const file = msg.message[i]  as FileSegment
+                (msg.message[i] as FileSegment) ={
+                    type:'file',
+                    data:{
+                        file:file.data.file
+                    }
+                }
                 let filePath = path.join('/Volumes/liuqianpan2008/MACServer/Keyimage', file.data.file)
                 await this.downloadFile((file?.data as any).url, filePath);
                 (msg.message[i] as FileSegment).data.file = filePath

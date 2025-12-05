@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干员立绘展示</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --text-primary: #f0f0f0;
+            --accent-primary: #bb86fc;
+            --border-radius: 12px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 1000px;
+            width: 1000px;
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        /* 粒子背景效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--accent-primary) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+            z-index: -1;
+            animation: moveBackground 60s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 40px 40px;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+        }
+
+        .character-container {
+            position: relative;
+            width: 600px;
+            height: 1000px;
+            background-color: rgba(15, 15, 15, 0.85);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin: 0 auto;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .character-image {
+            position: absolute;
+            transition: var(--transition);
+            transform-origin: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .character-image:hover {
+            transform: scale(1.2);
+            z-index: 10;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-primary);
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loaded .loading-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 图片加载错误处理 */
+        .image-error {
+            position: absolute;
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .character-container {
+                width: 100%;
+                height: 80vh;
+            }
+        }
+    </style>
+</head>
+<body class="loaded">
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <h1 class="title">猜干员</h1>
+        <div class="character-container">
+            <img 
+                src="{{data.alias}}" 
+                alt="{{data.name || '角色图片'}}" 
+                class="character-image" 
+                onError="this.classList.add('image-error'); this.innerHTML='加载失败'; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2250%22%20height%3D%2250%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23f44336%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202L2%207l10%205%2010-5-10-5z%22%3E%3C%2Fpath%3E%3Cpath%20d%3D%22M2%2017l10%205%2010-5%22%3E%3C%2Fpath%3E%3Cpath%20d%3D%22M2%2012l10%205%2010-5%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E';"
+            >
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面加载动画
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 500);
+
+            // 添加拖拽功能（可选）
+            const characterImage = document.querySelector('.character-image');
+            if (characterImage) {
+                let isDragging = false;
+                let offsetX, offsetY;
+
+                characterImage.addEventListener('mousedown', function(e) {
+                    isDragging = true;
+                    offsetX = e.clientX - parseInt(characterImage.style.left);
+                    offsetY = e.clientY - parseInt(characterImage.style.top);
+                    characterImage.style.zIndex = 100;
+                });
+
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    const container = document.querySelector('.character-container');
+                    const containerRect = container.getBoundingClientRect();
+                    const x = e.clientX - offsetX;
+                    const y = e.clientY - offsetY;
+
+                    // 限制在容器内
+                    const maxX = containerRect.width - characterImage.offsetWidth;
+                    const maxY = containerRect.height - characterImage.offsetHeight;
+                    const boundedX = Math.max(0, Math.min(x, maxX));
+                    const boundedY = Math.max(0, Math.min(y, maxY));
+
+                    characterImage.style.left = boundedX + 'px';
+                    characterImage.style.top = boundedY + 'px';
+                });
+
+                document.addEventListener('mouseup', function() {
+                    isDragging = false;
+                    characterImage.style.zIndex = 1;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

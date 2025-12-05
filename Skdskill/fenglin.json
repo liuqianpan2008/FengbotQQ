@@ -1,0 +1,37 @@
+{
+    "name":"枫林实例方案",
+    "version":"1.0.0",
+    "description":"这是一个方案，用于查看如何培养干员",
+    "author":"枫林",
+    "career":{
+        "先锋":1,
+        "狙击":2,
+        "医疗":3,
+        "术师":4,
+        "近卫":5,
+        "重装":6,
+        "特种":7
+    },
+    "data":{
+        "桃金娘":{
+            "lv":{
+                "lv":60,
+                "lv2":2,
+                "msg":"建议将[name]提升到精[lv2]等级[lv],当前等级为[nowLevel]"
+            },
+            "unqule":{
+                "unqule1": 1,
+                "unqule2": 3,
+                "skchr_blemsh_3": 3,
+                "msg":"建议将[skchr_blemsh]提升到[level],当前等级为[nowLevel]"
+            },
+            "skill1":{
+                "skill1": 1,
+                "skill2": 3,
+                "skill3": 3,
+                "msg":"建议将[skillName]提升到[level],当前等级为[nowLevel]"
+            },
+            "msg": "缺失干员[name]建议抽取"
+        }
+    }
+}

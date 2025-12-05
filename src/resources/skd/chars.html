@@ -1,0 +1,567 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干员信息 | 高级档案</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1e1e1e;
+            --bg-card: rgba(26, 26, 26, 0.85);
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --text-tertiary: #808080;
+            --accent-primary: #bb86fc;
+            --accent-primary-dark: #9d4edd;
+            --accent-secondary: #03dac6;
+            --accent-secondary-dark: #018786;
+            --border-radius: 12px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 粒子背景效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--accent-primary) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+            z-index: -1;
+            animation: moveBackground 60s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 40px 40px;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            border-radius: 3px;
+        }
+
+        .char-card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            transition: var(--transition);
+            position: relative;
+            backdrop-filter: blur(8px);
+            border: var(--border);
+        }
+
+        .char-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 背景图片容器 */
+        .skin-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            opacity: 0.15;
+            transition: var(--transition);
+        }
+
+        .char-card:hover .skin-background {
+            opacity: 0.2;
+            transform: scale(1.02);
+        }
+
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .char-card:hover .background-image {
+            transform: scale(1.05);
+        }
+
+        .char-header {
+            display: flex;
+            align-items: center;
+            padding: 30px 20px;
+            border-bottom: var(--border);
+            position: relative;
+        }
+
+        .char-portrait-container {
+            position: relative;
+            margin-right: 30px;
+        }
+
+        .char-portrait {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--accent-primary);
+            background-color: var(--bg-card);
+            padding: 3px;
+            transition: var(--transition);
+        }
+
+        .char-card:hover .char-portrait {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(187, 134, 252, 0.5);
+        }
+
+        /* 干员等级指示器 */
+        .level-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: var(--accent-primary);
+            color: #000;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            border: 3px solid var(--bg-secondary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .char-info {
+            flex: 1;
+        }
+
+        .char-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 8px rgba(187, 134, 252, 0.3);
+        }
+
+        .char-title {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .char-basic {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+            border: var(--border);
+        }
+
+        .info-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            color: var(--text-tertiary);
+            margin-right: 8px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .char-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 25px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .char-content {
+                grid-template-columns: 1fr;
+            }
+
+            .char-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .char-portrait-container {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .char-basic {
+                justify-content: center;
+            }
+        }
+
+        .content-section {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .content-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-secondary);
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: var(--border);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-secondary);
+            border-radius: 3px;
+        }
+
+        .skill-list, .equip-list {
+            list-style: none;
+        }
+
+        .skill-item, .equip-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            border: var(--border);
+        }
+
+        .skill-item:hover, .equip-item:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+            transform: translateX(5px);
+            border-left-color: var(--accent-primary);
+        }
+
+        .skill-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+            transition: var(--transition);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .skill-item:hover .skill-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(187, 134, 252, 0.4);
+        }
+
+        .skill-info {
+            flex: 1;
+        }
+
+        .skill-name, .equip-name {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        .skill-level, .equip-level {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        .default-badge {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .default-badge:hover {
+            background-color: rgba(33, 150, 243, 0.3);
+        }
+
+        .locked-badge {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .locked-badge:hover {
+            background-color: rgba(244, 67, 54, 0.3);
+        }
+
+        .unlocked-badge {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .unlocked-badge:hover {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loaded .loading-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            margin-top: 40px;
+            border-top: var(--border);
+        }
+    </style>
+</head>
+<body class="loaded">
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+       
+
+        <div class="char-card">
+            <div class="skin-background">
+                <img src="{{data.skinBank}}" alt="{{data.charId}}" class="background-image">
+            </div>
+
+            <div class="char-header">
+                <div class="char-portrait-container">
+                    <img src="{{data.charPortrait}}" alt="{{data.charId}}" class="char-portrait">
+                    <div class="level-indicator">{{data.level}}</div>
+                </div>
+                <div class="char-info">
+                    <h1 class="char-name">{{data.charName || data.charId}}</h1>
+                    <!--<p class="char-title">{{data.title || '未知干员'}}</p> -->
+                    <div class="char-basic">
+                        <div class="info-item">
+                            <span class="info-label">精英阶段:</span>
+                            <span class="info-value">{{data.evolvePhase}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">潜能等级:</span>
+                            <span class="info-value">{{data.potentialRank}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">信赖值:</span>
+                            <span class="info-value">{{data.favorPercent}}%</span>
+                        </div>
+                    </div>
+                    <div class="char-basic">
+                        <div class="info-item">
+                            <span class="info-label">获取时间:</span>
+                            <span class="info-value">{{data.gainTime}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">皮肤:</span>
+                            <span class="info-value">{{data.skinName}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="char-content">
+                <div class="content-section">
+                    <h2 class="section-title">技能信息</h2>
+                    <ul class="skill-list">
+                        {{each data.skills}}
+                        <li class="skill-item">
+                            <img src="{{$value.skillIcon}}" alt="{{$value.id}}" class="skill-icon">
+                            <div class="skill-info">
+                                <div class="skill-name">
+                                    {{$value.skillName}}
+                                    {{if $value.id === data.defaultSkillId}}<span class="badge default-badge">默认</span>{{/if}}
+                                </div>
+                                <div class="skill-level">
+                                    专精等级: {{$value.specializeLevel}}
+                                    {{if $value.id === data.mainSkillLvl}}<span class="badge default-badge">主修</span>{{/if}}
+                                </div>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+
+                <div class="content-section">
+                    <h2 class="section-title">模组信息</h2>
+                    <ul class="equip-list">
+                        {{each data.equip}}
+                        <li class="equip-item">
+                            <div class="equip-info">
+                                <div class="equip-name">
+                                    {{$value.equipName}}
+                                    {{if $value.id === data.defaultEquipId}}<span class="badge default-badge">默认</span>{{/if}}
+                                </div>
+                                <div class="equip-level">
+                                    等级: {{$value.level}}
+                                    {{if $value.locked}}<span class="badge locked-badge">未开启</span>{{else}}<span class="badge unlocked-badge">已开启</span>{{/if}}
+                                </div>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>干员信息档案 © 枫叶秋林</p>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后移除加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 500);
+
+            // 添加卡片动画效果
+            const cards = document.querySelectorAll('.skill-item, .equip-item');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px) scale(1.01)';
+                    this.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.25)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0) scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

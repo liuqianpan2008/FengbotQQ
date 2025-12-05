@@ -42,7 +42,7 @@ async function IsuserPermission(user_id: number, plugin: string, command: string
     if (await IsAdmin(user_id)) {
         return true;
     }
-    if (!await getUserData(user_id.toString())) {
+    if (!getUserData(user_id.toString())) {
         return false;
     }
     const permission = (await getuserPermissions(user_id.toString())).find((permission) => permission === `${plugin}.${command}`);
@@ -51,39 +51,39 @@ async function IsuserPermission(user_id: number, plugin: string, command: string
     } 
     return false;
 }
-export async function getuserPermissions(userId: string): Promise<string[]> {
-    const userData = await getUserData(userId);
+export function getuserPermissions(userId: string): string[] {
+    const userData = getUserData(userId);
     if (!userData) {
         return [];
     }else{
         return userData.Permission;
     }
 }
-export async function addPermission(userId: string, plugin: string, command: string) : Promise<boolean>{
-    const userPermission = await getuserPermissions(userId) || [];
+export function addPermission(userId: string, plugin: string, command: string) : boolean{
+    const userPermission = getuserPermissions(userId) || [];
     const permission = permissionCommands.find((permission) => permission.name === plugin + '.' + command);
     if (permission && !userPermission.includes(plugin + '.' + command)) {
         userPermission.push(plugin + '.' + command);
     }
-    const userData = await getUserData(userId)
+    const userData = getUserData(userId)
     if (!userData) {
         return false;
     }
     userData.Permission = userPermission;
-    await saveUserData(userId,userData);
+    saveUserData(userId, userData);
     return true;
 }
-export async function removePermission(userId: string, plugin: string, command: string) : Promise<boolean>{
-    const userPermission = await getuserPermissions(userId) || [];
+export function removePermission(userId: string, plugin: string, command: string) : boolean{
+    const userPermission = getuserPermissions(userId) || [];
     const permission = permissionCommands.find((permission) => permission.name === plugin + '.' + command);
     if (permission && userPermission.includes(plugin + '.' + command)) {
         userPermission.splice(userPermission.indexOf(plugin + '.' + command), 1);
     }
-    const userData = await getUserData(userId)
+    const userData = getUserData(userId)
     if (!userData) {
         return false;
     }
     userData.Permission = userPermission;
-    await saveUserData(userId,userData);
+    saveUserData(userId, userData);
     return true;
 }
