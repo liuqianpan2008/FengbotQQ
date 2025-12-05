@@ -9,10 +9,19 @@ import { qqBot } from '../app.js';
 import { load, saveConfig } from '../lib/config.js';
 import { download } from '../lib/download.js';
 import { IsAdmin } from '../lib/Permission.js';
-
+import { BotPlugin } from './plugin.js';
+import axios from 'axios';
+interface ShopPlugin {
+        name: string;
+        version: string;
+        describe: string;
+        author: string;
+        url: string;
+        status: 'disabled' | 'enabled';
+    }
 @plugins({
     name: "插件文件管理", //插件名称，用于显示在菜单中
-    version: "1.0.1", //插件版本号，用于显示在菜单中
+    version: "1.0.2", //插件版本号，用于显示在菜单中
     describe: "可以查看服务器的插件/日志，可以上传插件到群内", 
     author: "枫叶秋林",//插件作者，用于显示在菜单中
     help: { //插件帮助信息，用于显示在菜单中
@@ -20,8 +29,9 @@ import { IsAdmin } from '../lib/Permission.js';
         description: "显示帮助信息" //帮助信息描述
     }
 })
-export class PluginsFile {
+export class PluginsFile extends BotPlugin {
     constructor() {
+        super("PluginsFile");
         if (load.enable==true){
             qqBot.on('message', async (context) => {
                 try {
@@ -181,6 +191,133 @@ export class PluginsFile {
             botlogger.error('文件查找失败：', error);
             return '插件查找服务暂不可用';
         }
+    }
+    
+
+    @runcod(["shopPl", "商城插件"], "查看商城插件")
+    async shopPl(
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ): Promise<any> {
+        const shopPlugins = await this.getShopPlugins();
+        let message = '商城插件列表：\n';
+        if (shopPlugins.size === 0) {
+            message += '当前没有可用的商城插件。';
+        } else {
+            shopPlugins.forEach((plugin, name) => {
+                message += `${name} - ${plugin.describe} (版本: ${plugin.version}, 作者: ${plugin.author}, 状态: ${plugin.status})\n`;
+            });
+        }   
+        return message;
+
+    }
+    @runcod(["enableShopPl", "启用商城插件"], "启用商城插件")
+    async enableShopPl(
+        @param("插件名称", 'text') pluName: Receive["text"],
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ): Promise<any> {
+        const shopPlugins = await this.getShopPlugins();
+        if (!pluName.data.text) {
+            return '请输入插件名称。';
+        }
+        if (shopPlugins.size === 0) {
+            return '当前没有可用的商城插件。';
+        }
+        if (shopPlugins.get(pluName.data.text)?.status === 'enabled') {
+            return `插件 ${pluName} 已启用`;
+        }
+        if (!shopPlugins.has(pluName.data.text)) {
+            return `未找到名为 ${pluName} 的商城插件`;
+        }
+        const shopPlugin = shopPlugins.get(pluName.data.text) as ShopPlugin;
+        shopPlugin.status = 'enabled';
+        shopPlugins.set(pluName.data.text, shopPlugin);
+        await this.init("PluginsFile");
+        if (!this.config.Shopurl) {
+            throw new Error("Shopurl 未配置");
+        }
+        await download(this.config.Shopurl + shopPlugin.url, `../plugins/${pluName.data.text}.ts`);
+        return `已启用 ${pluName.data.text} 插件`;
+    }
+
+    //卸载
+    @runcod(["disableShopPl", "禁用商城插件"], "禁用商城插件")
+    async disableShopPl(
+        @param("插件名称", 'text') pluName: Receive["text"],
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ): Promise<any> {
+        const shopPlugins = await this.getShopPlugins();
+        if (!pluName.data.text) {
+            return '请输入插件名称。';
+        }
+        if (shopPlugins.size === 0) {
+            return '当前没有可用的商城插件。';
+        }
+        if (shopPlugins.get(pluName.data.text)?.status === 'disabled') {
+            return `插件 ${pluName} 已禁用`;
+        }
+        if (!shopPlugins.has(pluName.data.text)) {
+            return `未找到名为 ${pluName} 的商城插件`;
+        }
+        const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        const fullSavePath = path.join(__dirname, '../plugins', pluName.data.text + '.ts');
+        if (fs.existsSync(fullSavePath)) {
+            fs.unlinkSync(fullSavePath);
+            const shopPlugin = shopPlugins.get(pluName.data.text) as ShopPlugin;
+            shopPlugin.status = 'disabled';
+            shopPlugins.set(pluName.data.text, shopPlugin);
+            return `已卸载 ${pluName.data.text} 插件`;
+        }else{
+            return `未找到 ${pluName.data.text} 插件文件`;
+        }
+    }
+    //升级
+    @runcod(["upgradeShopPl", "升级商城插件"], "升级商城插件")
+    async upgradeShopPl(
+        @param("插件名称", 'text') pluName: Receive["text"],
+        context: PrivateFriendMessage | PrivateGroupMessage | GroupMessage
+    ){
+        const shopPlugins = await this.getShopPlugins();
+        if (!pluName.data.text) {
+            return '请输入插件名称。';
+        }
+        if (shopPlugins.size === 0) {
+            return '当前没有可用的商城插件。';
+        }
+        if (!shopPlugins.has(pluName.data.text)) {
+            return `未找到名为 ${pluName} 的商城插件`;
+        }
+        const shopPlugin = shopPlugins.get(pluName.data.text) as ShopPlugin;
+        if (shopPlugin.status === 'disabled') {
+            return `插件 ${pluName} 未启用`;
+        }
+        if (shopPlugin.version === (await this.getShopPlugins()).get(pluName.data.text)?.version) {
+            return `插件 ${pluName} 已是最新版本`;
+        }
+        await download(this.config.Shopurl + shopPlugin.url, `../plugins/${pluName.data.text}.ts`);
+        return `已升级 ${pluName.data.text} 插件`;
+    }
+    
+    private async getShopPlugins(): Promise<Map<string, ShopPlugin>> {
+        await this.init("PluginsFile");
+        if (!this.config.Shopurl) {
+            throw new Error("Shopurl 未配置");
+        }
+        const plugins = await this.readPluginList();
+        const response = await axios.get(await this.config.Shopurl+"/info.json");
+        const data = JSON.parse(JSON.stringify(response.data))
+        // 合并插件状态
+        const shopPlugins = new Map(Object.entries(data));
+        shopPlugins.forEach((plugin) => {
+            (plugin as ShopPlugin).status = 'disabled';
+        })
+        plugins.forEach((plugin) => {
+            if (shopPlugins.has(plugin.id)) {
+                const shopPlugin = shopPlugins.get(plugin.id) as ShopPlugin;
+                shopPlugin.status = 'enabled';
+                shopPlugins.set(plugin.id, shopPlugin);
+            }
+        });
+        return shopPlugins as Map<string, ShopPlugin>;
     }
 
 }
