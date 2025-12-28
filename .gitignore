@@ -1,100 +1,50 @@
-# 依赖目录
-node_modules/
-
 # 编译输出
 dist/
 build/
-*.js
-*.js.map
 
-# 运行时数据文件
-src/data/*.yaml
-!src/data/*.example.yaml
+# 依赖目录
+node_modules/
+.pnpm-store/
 
-# 配置文件
-src/config/*.yaml
-!src/config/*.example.yaml
-
-# 日志文件
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# 环境配置
+# 环境配置（包含敏感信息）
+config.yaml
 .env
 .env.local
 .env.*.local
 
-# IDE 配置
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
+# 日志文件
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# 系统文件
+# macOS 系统文件
 .DS_Store
-Thumbs.db
 .AppleDouble
 .LSOverride
-Desktop.ini
 
-# 临时文件
+# 编辑器配置
+.idea/
+.vscode/
 *.swp
 *.swo
 *~
-*.bak
-*.tmp
 
-# TypeScript 缓存
+# 测试覆盖
+coverage/
+.nyc_output/
+
+# 临时文件
+*.tmp
+*.temp
+tmp/
+temp/
+
+# TypeScript
 *.tsbuildinfo
 
-# 测试覆盖率报告
-coverage/
-
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# pnpm
-.pnpm-store/
-
-# 本地数据库文件
-*.sqlite
-*.db
-
-# 自动生成的文档
-/docs/api/
-
-# 其他
-.history/
-.cache/
-
-# 测试文件
-test/
-
-src/plugins/*
-!src/plugins/PluginsFile.ts
-!src/plugins/test.ts
-!src/plugins/log.ts
-!src/plugins/ecomony.ts
-!src/plugins/prop.ts
-!src/plugins/Permission.ts
-!src/plugins/wiki.ts
-!src/plugins/mc.ts
-
-/data
-
-/src/plugins/mc.ts
-/src/config/mc.yml
-botQQ_screenshots/GroupEventData.json
-botQQ_screenshots/GroupWorldData.json
-botQQ_screenshots/bilibiliData.json
-botQQ_screenshots/bilibiliSpace.json
-
-/botQQ_Puppeteer
-/botQQ_screenshots/
+# OS 文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
