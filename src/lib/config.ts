@@ -1,23 +1,21 @@
-//读取配置文件
-import * as fs from 'fs'
-import * as path from 'path'
 import * as yaml from 'js-yaml'
-import { fileURLToPath } from 'node:url';
+import * as path from 'path'
+import * as fs from 'fs'
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export async function loadConfig(file: string): Promise<any> {
-    const configPath = path.join(__dirname, `../config/${file}.yml`);  // 保持源码与编译后一致
-    return await yaml.load(fs.readFileSync(configPath, 'utf8')) as any;
-}
-export function saveConfig(file: string, data: any): void {
-    const configPath = path.join(__dirname, `../config/${file}.yml`);  // 保持源码与编译后一致
-    fs.writeFileSync(configPath, yaml.dump(data));
+
+function loadSync(file: string): any {
+    const configPath = path.join(__dirname, `../config/${file}.yaml`);
+    console.log('[Config] Loading:', configPath);
+    const content = fs.readFileSync(configPath, 'utf8');
+    console.log('[Config] Raw Content:', JSON.stringify(content));
+    const parsed = yaml.load(content);
+    console.log('[Config] Parsed:', JSON.stringify(parsed));
+    console.log('[Config] Type:', typeof parsed);
+    console.log('[Config] Keys:', Object.keys(parsed as object));
+    return parsed;
 }
 
-export const Botconfig = await loadConfig('bot');
-export const PermissionConfig = await loadConfig('permission');
-export const load = await loadConfig('load')
-export const economy = await loadConfig('economy')
-export const mccfg = await loadConfig('mc')
-export const flToolConfig = await loadConfig('fenglinTool')
-
+export const Botconfig = loadSync('bot').bot;
+export const Cmdconfig = loadSync('bot').cmd;

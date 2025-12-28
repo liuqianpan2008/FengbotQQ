@@ -1,68 +1,25 @@
 {
-  "name": "botqq",
+  "name": "wxbot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "build": "cp -R ./src/config/ ./dist/ && cp -R ./src/resources/ ./dist/ && tsc",
-    "dev": "nodemon --watch src --ext ts,yml --exec \"node --no-warnings --loader=ts-node/esm --import=ts-node/esm src/app.ts\"",
-    "start": "npm run build && node dist/app.js"
+    "start": "node dist/app.js",
+    "build": "rm -rf dist && tsc && mkdir -p dist/config && cp -r src/config/*.yaml dist/config/",
+    "dev": "tsc -w",
+    "ws:run": "ts-node src/ws-client.ts"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "fetch-cookie": "^3.1.0",
-    "jsqr": "^1.4.0",
-    "qrcode": "^1.5.4",
-    "tough-cookie": "^6.0.0",
-    "https-proxy-agent": "^7.0.0",
-    "@skland-x/core": "workspace:*",
-    "@date-fns/tz": "^1.2.0",
-    "date-fns": "^4.1.0",
-    "defu": "^6.1.4",
-    "unctx": "^2.4.1",
-    "unstorage": "^1.16.0",
-    "@renmu/bili-api": "^2.7.0",
-    "@types/sharp": "^0.32.0",
-    "art-template": "^4.13.2",
-    "axios": "^1.7.8",
-    "fluent-ffmpeg": "^2.1.3",
-    "jimp": "^1.6.0",
-    "js-yaml": "^4.1.0",
-    "minimist": "^1.2.8",
-    "node-cron": "^3.0.3",
-    "node-napcat-ts": "^0.4.0",
-    "puppeteer": "^23.9.0",
-    "puppeteer-screen-recorder": "^3.0.6",
-    "rcon-client": "^4.2.5",
-    "reflect-metadata": "^0.2.2",
-    "sharp": "^0.34.3",
-    "tesseract.js": "^6.0.1",
-    "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0",
-    "yaml": "^2.6.1"
-  },
   "devDependencies": {
-    "https-proxy-agent": "^7.0.0",
-    "@skland-x/core": "workspace:*",
-    "@date-fns/tz": "^1.2.0",
-    "date-fns": "^4.1.0",
-    "defu": "^6.1.4",
-    "unctx": "^2.4.1",
-    "unstorage": "^1.16.0",
     "@types/js-yaml": "^4.0.9",
-    "@types/minimist": "^1.2.5",
-    "@types/node": "^16.18.126",
-    "@types/node-cron": "^3.0.11",
-    "@types/winston": "^2.4.4",
-    "nodemon": "^3.1.9",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "ws": "^8.18.3"
   }
 }
